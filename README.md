@@ -1,0 +1,2 @@
+# tipificador
+Gebnet Tipificador
