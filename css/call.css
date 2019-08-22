@@ -1,0 +1,182 @@
+/* Estilos CSS sistema de Gebnet*/
+/*Cuerpo de la pagina*/
+html,body{
+	height:100%;
+	min-width:100%;
+}
+header {
+	text-align:center;
+	color:#004E9B;
+	background:#D7D7D7;
+	min-height:10%;
+}
+
+h3{
+	color:#337ab7;
+	font-weight:bold;
+}
+.contenido {
+	width: 100%;
+	min-height:86%;
+}
+
+.tab-pane{
+	padding-top:25px;
+}
+
+/* ~~ El pie de página ~~ */
+footer {
+	position: absolute;
+	text-align:center;
+	color:#737373;
+	min-height:3%;	
+	width: 100%;
+	border-top: 1px solid #e5e5e5;
+}
+.cursor{
+	cursor:pointer
+}
+.disable{
+	cursor:not-allowed
+}
+.login-popussp{
+	display:none;
+	border: 2px solid #646464;
+	float: left;
+	border-radius:4px;
+	position: fixed;
+	top: 50%; left: 50%;
+	z-index: 99999;
+	box-shadow: 0px 0px 20px #FFF;
+	-moz-box-shadow: 0px 0px 20px #FFF; /* Firefox */
+    -webkit-box-shadow: 0px 0px 20px #FFF; /* Safari, Chrome */
+	border-radius:4px 4px 4px px;
+    -moz-border-radius: 4px; /* Firefox */
+    -webkit-border-radius: 4px; /* Safari, Chrome */
+}
+.login-popup{
+	display:none;
+}
+
+.luminoso{
+  background-color: #efefef;
+  -webkit-background-clip: padding-box;
+          background-clip: padding-box;
+  border: 1px solid #999;
+  border: 1px solid rgba(0, 0, 0, .2);
+  border-radius: 6px;
+  outline: 0;
+  -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
+          box-shadow: 0 3px 9px rgba(0, 0, 0, .5);	
+}
+
+.centrado{
+  position:relative;
+  top:50%;
+  transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+}
+
+table.formulario thead th,
+table.formulario tfoot th {
+  background:#337ab7;
+  color:#FFF;
+  padding: 4px 14px 2px 14px;  
+  text-align:center;
+  font-size:12px;
+  
+}
+
+table.formulario tr td{
+  text-align:center; 
+  vertical-align:middle;
+}
+table.formulario tr {
+	background-color:#E6E9ED;
+	box-shadow:#000;
+	font-size:small;
+	text-align:center
+
+}
+.oculto{
+	display:none
+}
+
+.burbuja {
+	position:absolute;
+	min-width:22px;
+	text-align:center;
+    top: 1px;
+    right:1px;
+    padding:0px 1px 0px 0px;
+    background-color:red; 
+    color:white;
+	font-size:smaller;
+    font-weight: bold;
+    border-radius: 5px;
+    box-shadow:1px 1px 1px gray;
+	display:none;
+}
+
+section {
+	background:#E8E8E8;
+	margin-top: 10px;
+	padding: 10px 5px;
+	border-radius:4px;
+	-moz-border-radius:4px; //Firefox
+	-webkit-border-radius:4px; //Safari y navegadores que usen WebKit	
+	box-shadow: 1px 1px 2px rgba(0,0,0,.5);
+	-webkit-box-shadow: 1px 1px 2px rgba(0,0,0,.5);
+	-moz-box-shadow: 1px 1px 2px rgba(0,0,0,.5);
+}
+.blanco{
+	background:white
+}
+
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:hover,
+.navbar-default .navbar-nav > .active > a:focus {
+  color: white;
+  background-color: #337ab7;
+   -webkit-border-radius: 3px 3px;  /* Safari  */
+  -moz-border-radius: 3px 3px;     /* Firefox */
+}
+
+.navbar-default .navbar-nav > .open > a,
+.navbar-default .navbar-nav > .open > a:hover,
+.navbar-default .navbar-nav > .open > a:focus {
+  color:#000;
+  background-color: #d7ebff;
+   -webkit-border-radius: 3px 3px;  /* Safari  */
+  -moz-border-radius: 3px 3px;     /* Firefox */  
+}
+
+.bg-primary{
+  background-color: #337ab7;
+  border-radius: 4px 4px 0px 0px;
+}
+
+.content-dialog{
+  background-color: #F3F3F3;
+  border-radius: 0px 0px 4px 4px;
+}
+
+.panel > .close {   
+    line-height: 1.6;
+	margin-right:10px;
+}
+
+.mensajes{
+	margin-top:5px;	
+}
+@media (min-width: 992px) {
+  .modal-lg {
+    width: 1152px;
+  }
+}
+.agrupado{
+	padding-left:0;
+	padding-right:0;
+}
+
