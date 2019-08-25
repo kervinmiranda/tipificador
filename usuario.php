@@ -218,7 +218,6 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 				$('#modulos2').parent().removeClass('has-error').addClass('has-success');
 			}
 
-			accion= 'editar';
 			cedula = $('#cedula2').val();
 			nombre = $('#nombre2').val();
 			userid = $('#userid2').val();
@@ -279,12 +278,11 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 				return false;
 			}
 
-			accion = "resetear";
 			cedula = $('#cedula3').val();
 			clave_nueva = $('#clave_nueva').val();
 			bootbox.confirm('¿Seguro que desea el resetear la contraseña del Usuario?', function(result){
 				if (result == true){
-					$.post("include/guardar_usuario.php", {accion:accion, cedula:cedula, clave_nueva:clave_nueva}, function(data){
+					$.post("include/pdo/usuario.php", {function:'resetPassword', cedula:cedula, clave_nueva:clave_nueva}, function(data){
 						if (data  == '0'){
 							$('#error').html('<strong>¡Error!</strong> Error al Editar la Contraseña, Intente mas tarde').fadeIn(1000).fadeOut(5000);
 							}else if (data == '1'){
@@ -300,13 +298,12 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 
 	//Cambiar el estatus del usuario
 		$('#lista tbody').on('click', '.camb', function(){
-			var accion = "estatus";
 			var element = $(this).attr('id').split('│');
 			var cedula = element[0];
 			var estatus = element[1];
 			bootbox.confirm('¿Seguro que desea el cambiar el Estatus del Usuario?', function(result){
 				if (result == true){
-					$.post("include/guardar_usuario.php", {accion:accion , cedula:cedula, estatus:estatus}, function(data){
+					$.post("include/pdo/usuario.php", {function:'changeStatus', cedula:cedula, estatus:estatus}, function(data){
 						if (data  == '0'){
 							$('#error').html('<strong>¡Error!</strong> Error al Editar el Estatus, Intente mas tarde').$('#error').fadeIn(1000).fadeOut(5000);
 						}else if (data == '1'){
@@ -320,7 +317,13 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 
 	//Convertir la tabla en Datatable
 		$('#lista').dataTable({
-			"ajax": "include/consultau.php",
+			"ajax": {
+			    "url": "include/pdo/usuario.php",
+			    "type": "POST",
+			    "data": {
+			        "function": "getUsers"
+			    }
+			},
 			"sPaginationType": "full_numbers",
 			"language": {
 				"sProcessing":     "Procesando...",
