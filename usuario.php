@@ -126,7 +126,6 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 			}
 			bootbox.confirm('¿Seguro que desea Incluir el Usuario?', function(result){
 				if (result == true){
-					accion= 'nuevo';
 					cedula = $('#cedula').val();
 					nombre = $('#nombre').val();
 					userid = $('#userid').val();
@@ -135,7 +134,7 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 					tipousuario = $('#tipousuario').val();
 					modulos = $('#modulos').val();
 					clave = $('#clave').val();
-					$.post('include/pdo/usuario.php', {accion:accion, cedula:cedula, nombre:nombre, userid:userid, cargo:cargo, departamento:departamento, tipousuario:tipousuario, modulos:modulos, clave:clave}, function(data){
+					$.post('include/pdo/usuario.php', {function:'newUser', cedula:cedula, nombre:nombre, userid:userid, cargo:cargo, departamento:departamento, tipousuario:tipousuario, modulos:modulos, clave:clave}, function(data){
 						if (data  == '0'){
 							$('#error').html('<strong>¡Error!</strong> Error a Incluir el Usuario, Intente Nuevamente').fadeIn(1000).fadeOut(5000);
 						}else if (data == '1'){
@@ -153,7 +152,6 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 		});//End Function		
 
 	//Mostrar Formulario de editar Usuario
-
 		$('#lista tbody').on('click', '.edit', function(){
 			var modulos;
 			var cedula = $(this).attr('id');
@@ -162,7 +160,7 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 				$(this).removeAttr('selected').prop('selected', false);
 	  		});
 	  		$("#modulos2").multiselect('refresh');
-			$.post('include/buscar_usuario.php', {cedula:cedula}, function(data){
+			$.post('include/pdo/usuario.php', {function:'getUser', cedula:cedula}, function(data){
 				var obj = jQuery.parseJSON(data);
 				$('#nombre2').val(obj.nombre).parent().removeClass('has-error has-success');
 				$('#cargo2').val(obj.cargo).parent().removeClass('has-error has-success');
@@ -230,7 +228,7 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 			modulos = $('#modulos2').val();
 				bootbox.confirm('¿Seguro que desea el Editar el Usuario?', function(result){
 				if (result == true){
-					$.post('include/pdo/usuario.php', {accion:accion, cedula:cedula, nombre:nombre, cargo:cargo, departamento:departamento, tipousuario:tipousuario, modulos:modulos}, function(data){
+					$.post('include/pdo/usuario.php', {function:'editUser', cedula:cedula, nombre:nombre, cargo:cargo, departamento:departamento, tipousuario:tipousuario, modulos:modulos}, function(data){
 						if (data  == '0'){
 							$('#error').html('<strong>¡Error!</strong> "Error al Editar el Usuario, Intente mas tarde"').fadeIn(1000).fadeOut(5000);
 						}else if (data == '1'){
