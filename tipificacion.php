@@ -7,6 +7,7 @@ include_once 'include/pdo/consultas.php';
 include_once 'include/fecha.php';
 include_once 'include/variables.php';
 if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
+	$motives = getMotives();
 ?>
 <?php echo $doctype?>
 
@@ -64,10 +65,9 @@ $(document).ready(function(){
 
 		bootbox.confirm('¿Seguro que desea Incluir el Tipo de Tipificación?', function(result){
 			if (result == true){
-				accion= 'nuevo';
 				motivo = $('#motivo').val();
 				sub_motivo = $('#sub_motivo').val();
-				$.post('include/guardar_tipificacion.php', {accion:accion, motivo:motivo, sub_motivo:sub_motivo}, function(data){
+				$.post('include/pdo/tipificacion.php', {function:"newTipification", motivo:motivo, sub_motivo:sub_motivo}, function(data){
 					if (data  == '0'){
 						$('#error').html('<strong>¡Error!</strong> Error al Incluir el Tipo de Tipificación, Intente más tarde').fadeIn(1000).fadeOut(5000);
 					}else if (data == '1'){
@@ -114,11 +114,10 @@ $(document).ready(function(){
 
 		bootbox.confirm('¿Seguro que desea Editar el Tipo de Tipificación?', function(result){
 			if (result == true){
-				accion= 'editar';
 				id = $('#id2').val();
 				motivo = $('#motivo2').val();
 				sub_motivo = $('#sub_motivo2').val();
-				$.post('include/guardar_tipificacion.php', {accion:accion, id:id, motivo:motivo, sub_motivo:sub_motivo}, function(data){
+				$.post('include/pdo/tipificacion.php', {function:"editTipification", id:id, motivo:motivo, sub_motivo:sub_motivo}, function(data){
 					if (data  == '0'){
 						$('#error').html('<strong>¡Error!</strong> Error al Editar el Tipo de Tipificación, Intente más tarde').fadeIn(1000).fadeOut(5000);
 					}else if (data == '1'){
@@ -134,13 +133,12 @@ $(document).ready(function(){
 
 //Cambiar el estatus del Tipo de Tipificación
 	$('#lista tbody').on('click', '.camb', function(){
-		var accion = "estatus";
 		var element = $(this).attr('id').split('│');
 		var id = element[0];
 		var estatus = element[1];
 		bootbox.confirm('¿Seguro que desea el cambiar el Estatus del Tipo de Tipificación?', function(result){
 			if (result == true){
-				$.post("include/guardar_tipificacion.php", {accion:accion , id:id, estatus:estatus}, function(data){
+				$.post("include/pdo/tipificacion.php", {function:"changeStatus", id:id, estatus:estatus}, function(data){
 					if (data  == '0'){
 						$('#error').html('<strong>¡Error!</strong> Error al Editar el Estatus, Intente mas tarde').$('#error').fadeIn(1000).fadeOut(5000);
 					}else if (data == '1'){
@@ -263,14 +261,13 @@ $(document).ready(function(){
                         <label for="motivo">Motivo</label>
                         <select name="motivo" id="motivo" class="form-control">
                             <option>Selecionar...</option>
-                            <?php
-                                $buscar =mysql_query("SELECT DISTINCT principal FROM call_tipificacion");
-                                    if (mysql_num_rows($buscar)){
-                                        while ($row = mysql_fetch_row($buscar)){
-                                            echo '<option>'.utf8_encode($row[0]).'</option>';
-                                        }//End while
-                                    }//End if
-                            ?>
+                            <?php	                           		
+                           		if (!is_null($motives )){
+                           			foreach ($motives as $key => $value){
+                           				echo '<option>'.utf8_encode($value['principal']).'</option>';
+                           			}
+                           		}
+	                        ?>                            
                         </select>
                     </div>
                     <div class="form-group col-xs-12 col-md-6 text-center">
@@ -303,14 +300,13 @@ $(document).ready(function(){
                         <label for="motivo2">Motivo</label>
                         <select name="motivo2" id="motivo2" class="form-control">
                             <option>Selecionar...</option>
-                            <?php
-                                $buscar =mysql_query("SELECT DISTINCT principal FROM call_tipificacion");
-                                    if (mysql_num_rows($buscar)){
-                                        while ($row = mysql_fetch_row($buscar)){
-                                            echo '<option>'.utf8_encode($row[0]).'</option>';
-                                        }//End while
-                                    }//End if
-                            ?>
+                            <?php	                           		
+                           		if (!is_null($motives )){
+                           			foreach ($motives as $key => $value){
+                           				echo '<option>'.utf8_encode($value['principal']).'</option>';
+                           			}
+                           		}
+	                        ?>
                         </select>
                     </div>
                     <div class="form-group col-xs-12 col-md-5 text-center">
