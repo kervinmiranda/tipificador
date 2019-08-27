@@ -2,7 +2,7 @@
 /*************************************************************************************************************************
                                                          SISTEMA GEBNET
 ****************************************************************************************************************************/
-include_once 'include/conexion.php';
+include_once 'include/pdo/consultas.php';
 include_once 'include/fecha.php';
 include_once 'include/variables.php';
 if(isset($_SESSION['user'])){
@@ -28,8 +28,6 @@ if(isset($_SESSION['user'])){
 <script src="js/libreriajs.js"></script>
 <script type="text/javascript">
 
-
-
 $(document).ready(function(){
 //Activar Menú
 	$("#menu3").attr('class','active');
@@ -39,13 +37,12 @@ $(document).ready(function(){
 		$('#submotivo').empty();		
 		$('#motivo option:selected').each(function () {
 			elegido=$(this).val();
-			$.post('include/buscar_sub.php', { elegido: elegido }, function(data){
+			$.post('include/pdo/registro.php', { function:"buscarSub", elegido:elegido }, function(data){
 				$('#submotivo').html(data);
 			});            
         });
    });
   
-
 //Validar entrada de Codigo LIB
 	$('#socialuser').keypress(function(e){
 		validarKey(e);
@@ -55,15 +52,15 @@ $(document).ready(function(){
    $('#boton1').click(function (){
 	 var contador = 0;
 
-		var d=new Date();
-		var dia=new Array(7);
-		dia[0]="Domingo";
-		dia[1]="Lunes";
-		dia[2]="Martes";
-		dia[3]="Miercoles";
-		dia[4]="Jueves";
-		dia[5]="Viernes";
-		dia[6]="Sabado";
+		var d = new Date();
+		var dia = new Array(7);
+		dia[0] = "Domingo";
+		dia[1] = "Lunes";
+		dia[2] = "Martes";
+		dia[3] = "Miercoles";
+		dia[4] = "Jueves";
+		dia[5] = "Viernes";
+		dia[6] = "Sabado";
 
 		var mes= d.getMonth()+1;
 		var dia_aux = 0;
@@ -109,9 +106,6 @@ $(document).ready(function(){
 
 					dia_aux = d.getDay() + 2;	// parche por diferencia de hora server
 					fecha = dia_aux+'/'+mes+'/'+d.getFullYear()+' '+d.getHours()+':'+d.getUTCHours()+':'+d.getMinutes()+':'+d.getSeconds();
-
-//					fecha = 'hola2';
-
 
 					$.post('include/guardar_registro.php', {accion:accion , pais:pais, fecha:fecha, motivo:motivo, submotivo:submotivo, codigo:codigo, guia:guia, socialuser:socialuser, comentario:comentario}, function(data){
 							id = data;
@@ -201,9 +195,6 @@ $(document).ready(function(){
 
 					dia_aux = d.getDay() + 2;	// parche por diferencia de hora server
 					fecha = dia_aux+'/'+mes+'/'+d.getFullYear()+' '+d.getHours()+':'+d.getUTCHours()+':'+d.getMinutes()+':'+d.getSeconds();
-
-//					fecha = 'hola2';
-
 
 					$.post('include/guardar_registro.php', {accion:accion, pais:pais, fecha:fecha, motivo:motivo,submotivo:submotivo,codigo:codigo,socialuser:socialuser, guia:guia, comentario:comentario}, function(data){
 					id = data;
@@ -383,13 +374,13 @@ $(document).ready(function(){
                 <select name="pais" id="pais" class="form-control validar">
                 <option>Seleccionar...</option>
                 <?php
-                    $consulta = mysql_query("SELECT DISTINCT descripcion FROM call_pais WHERE estatus = '1' ORDER BY descripcion ASC");
-                        if(mysql_num_rows($consulta)){ // if para almacenar el resultado de la consulta
-                            while($lista = mysql_fetch_array($consulta)){
-                            echo "<option>".utf8_encode($lista['descripcion'])."</option>";
-                            }//End While
-                        }//End If		
-                
+                    $paises = getPaises();
+                    if (!is_null($paises)){
+               			foreach ($paises as $key => $value){
+               				echo '<option>'.utf8_encode($value['descripcion']).'</option>';
+               			}
+               		}
+
                 ?>            
                 </select>      	                
             </div>
@@ -398,13 +389,12 @@ $(document).ready(function(){
                 <select name="motivo" id="motivo" class="form-control validar">
                 <option>Seleccionar...</option>
                 <?php
-                    $consulta = mysql_query("SELECT DISTINCT principal FROM call_tipificacion WHERE estatus = '1' ORDER BY principal ASC");
-                        if(mysql_num_rows($consulta)){ // if para almacenar el resultado de la consulta
-                            while($lista = mysql_fetch_array($consulta)){
-                            echo "<option>".utf8_encode($lista['principal'])."</option>";
-                            }//End While
-                        }//End If		
-                
+                    $motivos = getMotivos();
+                    if (!is_null($motivos)){
+               			foreach ($motivos as $key => $value){
+               				echo '<option>'.utf8_encode($value['principal']).'</option>';
+               			}
+               		}
                 ?>            
                 </select>      	                
             </div>
@@ -514,7 +504,6 @@ $(document).ready(function(){
 </body>
 </html>
 <?php
-mysql_close($conexion);
 }else{
 	header("location:../index.php?error=ingreso");
 }

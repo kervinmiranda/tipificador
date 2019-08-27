@@ -33,4 +33,32 @@
 		return $data;
 	}
 
+	function getPaises(){
+		$objdatabase = new Database();
+		$sql = $objdatabase->prepare("SELECT DISTINCT descripcion FROM call_pais WHERE estatus = '1' ORDER BY descripcion ASC");
+		//Exjecutamos la Query
+		$sql->execute(); // se confirma que el query exista
+		//Verificamos el resultado
+		$count = $sql->rowCount();
+		$data = null;		
+		if($count){
+			$data = $sql->fetchAll();					
+		}
+		return $data;
+	}
+
+	function getMotivos(){
+		$objdatabase = new Database();
+		$sql = $objdatabase->prepare("SELECT DISTINCT principal FROM call_tipificacion WHERE estatus = '1' ORDER BY principal ASC");
+		//Exjecutamos la Query
+		$sql->execute(); // se confirma que el query exista
+		//Verificamos el resultado
+		$count = $sql->rowCount();
+		$data = null;		
+		if($count){
+			$data = $sql->fetchAll();					
+		}
+		return $data;		
+	}
+
 ?>
