@@ -133,7 +133,52 @@ if(isset($_SESSION['user'])){
 		$objdatabase = null;
 		echo $data;
 	}
+
+	//Search Lib o cédula
+	function searchLib(){
+		$tipo = $_POST['tipo'];
+		$objdatabase = new Database();
+		$codigo = $_POST['codigo'];
+		switch ($tipo) {
+			case "lib":
+				$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE libced =:libced ORDER BY fecha DESC");
+				$sql->bindParam(':libced', $codigo, PDO::PARAM_STR);
+				break;
+			case "guia":
+				$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE guiatracking LIKE '%:guia%' ORDER BY fecha DESC");
+				$sql->bindParam(':guia', $codigo, PDO::PARAM_STR);
+				break;			
+			default:				
+				break;
+		}
+		$sql->execute(); // se confirma que el query exista	
+		//Verificamos el resultado
+		$count = $sql->rowCount();
+		if ($count){
+			$json = array();
+			$result = $sql->fetchAll();
+			foreach ($result as $key => $value){
+				$fec = date_create($value['fecha']);
+				$json[] = array(
+					'fecha' => date_format($fec, 'd/m/Y h:i a'),
+					'usuario' => utf8_encode($value['usuario']),
+					'departamento' => utf8_encode($value['departamento']),
+					'motivo' => utf8_encode($value['motivo']),
+					'sub_motivo' => utf8_encode($value['sub_motivo']),
+					'libced' => utf8_encode($value['libced']),
+					'usersocial' => utf8_encode($value['usersocial']),
+					'guiatracking' => utf8_encode($value['guiatracking']),
+					'comentario' => utf8_encode($value['comentario'])
+				);
+			}
+			$json['success'] = true;
+			echo json_encode($json);
+		}
+	}
+
+	function searchCode(){
 		
+	}
 
 	$function  = $_POST['function']; //Obtener la Opción a realizar (Nuevo, editar, bloquear)
 	switch ($function) {
@@ -148,6 +193,12 @@ if(isset($_SESSION['user'])){
 			break;
 		case "changeStatus":
 			changeStatus();
+			break;
+		case "searchLib":
+			searchLib();
+			break;
+		case "searchCode":
+			searchCode();
 			break;
 		default:
 			break;

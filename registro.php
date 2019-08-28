@@ -112,14 +112,7 @@ $(document).ready(function(){
 						if (id == 0){
 							$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Error al incluir los datos, Intente más tarde</div>');
 						}else{
-
-
 							$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Exito!</strong> Tipificación Ingresada Correctamente con el N°: <strong>'+id+'</strong></div>');
-
-/*							
-						 $('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Exito!</strong> Tipificación Ingresada Correctamente con el N°: <strong>'+id+'</strong> '+dia[d.getDay()]+' '+dia_aux+'/'+mes+'/'+d.getFullYear()+' '+d.getHours()+':'+d.getUTCHours()+':'+d.getMinutes()+':'+d.getSeconds()+' </div>');
-*/
-
 							$('#formulario input').val('').parent().removeClass('has-error has-success');
 							$('#formulario textarea').val('').parent().removeClass('has-error has-success');
 							$('#formulario select').prop('selectedIndex',0).parent().removeClass('has-error has-success');
@@ -148,11 +141,6 @@ $(document).ready(function(){
 
 		var mes= d.getMonth()+1;
 		var dia_aux = 0;
-
-//document.write('Fecha: '+d.getDate(),'<br>Dia de la semana: '+d.getDay(),'<br>Mes (0 al 11): '+d.getMonth(),'<br>Año: '+d.getFullYear(),'<br>Hora: '+d.getHours(),'<br>Hora UTC: '+d.getUTCHours(),'<br>Minutos: '+d.getMinutes(),'<br>Segundos: '+d.getSeconds());
-
-//		date_default_timezone_set('America/Caracas');
-//	    var fecha = date("d-m-Y h:i:s");
 
 	  	$("#formulario input").filter('.validar').each(function (index) { 
         	if ($(this).val() == ''){
@@ -224,9 +212,9 @@ $(document).ready(function(){
 		}		
 		$('#lista > tbody').empty();		
 		$.ajax({
-			url: 'include/consultalib.php',
+			url: 'include/pdo/tipificacion.php',
 			type: 'post',
-			data: {codigo:codigo, tipo:tipo},
+			data: {function:"searchLib", codigo:codigo, tipo:tipo},
 			dataType: 'json',
 			success: function (data) {
 				if (data.success) {
@@ -242,7 +230,7 @@ $(document).ready(function(){
 							usersocial = record.usersocial;						
 							guiatracking = record.guiatracking;											
 							var row = $('<tr />');
-							$(row).attr('title', 'Comentario: '+record.comentario);
+							$(row).attr('title', 'Comentario: '+ record.comentario);
 							$('<td />').appendTo(row).append(fecha);
 							$('<td />').appendTo(row).append(usuario);
 							$('<td />').appendTo(row).append(departamento);
@@ -324,7 +312,20 @@ $(document).ready(function(){
 	$(function(){
 		$('#codigo').autocomplete({
 			minLength: 7,
-			source : 'include/buscar_codigo.php',
+			source: function( request, response ) {
+			   	// Fetch data
+			   	$.ajax({
+			    	url: "include/pdo/tipificacion.php",
+			    	type: 'post',
+			    	dataType: "json",
+			    	data: {
+			     		function:"searchCode" 
+			    	},
+			    	success: function( data ) {
+			     		response( data );
+			    	}
+			   	});
+		  	},
 			select : function(event, ui){
 				$('#resultados').slideUp('slow', function(){
 					$('#resultados').html(
