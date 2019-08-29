@@ -311,7 +311,7 @@ $(document).ready(function(){
 //Función para buscar el autocompletado del código o códula
 	$(function(){
 		$('#codigo').autocomplete({
-			minLength: 7,
+			minLength: 5,
 			source: function( request, response ) {
 			   	// Fetch data
 			   	$.ajax({
@@ -319,10 +319,11 @@ $(document).ready(function(){
 			    	type: 'post',
 			    	dataType: "json",
 			    	data: {
-			     		function:"searchCode" 
+			     		function:"searchCode",
+			     		codigo: request.term
 			    	},
 			    	success: function( data ) {
-			     		response( data );
+			     		response(data);
 			    	}
 			   	});
 		  	},

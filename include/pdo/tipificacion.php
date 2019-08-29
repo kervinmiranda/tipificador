@@ -177,7 +177,22 @@ if(isset($_SESSION['user'])){
 	}
 
 	function searchCode(){
-		
+		$objdatabase = new Database();
+		$codigo = $_POST['codigo'];
+		$sql = $objdatabase->prepare("SELECT DISTINCT libced FROM call_registro WHERE libced LIKE '%$codigo%' ORDER BY libced");
+		$sql->bindParam(':codigo', $codigo, PDO::PARAM_STR);
+		$sql->execute(); // se confirma que el query exista	
+		//Verificamos el resultado
+		$count = $sql->rowCount();
+		if ($count){
+			$json = array();
+			$result = $sql->fetchAll();
+			foreach ($result as $key => $value){
+				$json[] = array("value" => $value['libced']);
+			}
+			$json['success'] = true;
+			echo json_encode($json);
+		}
 	}
 
 	$function  = $_POST['function']; //Obtener la Opción a realizar (Nuevo, editar, bloquear)
