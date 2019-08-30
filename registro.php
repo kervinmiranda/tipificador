@@ -204,7 +204,7 @@ $(document).ready(function(){
 
 //Función para buscar los registros de cedulas o lib con el boton de busqueda
 	$('#search').click(function(){		
-		var codigo = $('#codigo').val();	
+		var value = $('#codigo').val();	
 		var tipo = 'lib';
 		if (codigo == ''){
 			bootbox.alert('Debe Escribir un Código LIB o Cédula');
@@ -214,7 +214,7 @@ $(document).ready(function(){
 		$.ajax({
 			url: 'include/pdo/tipificacion.php',
 			type: 'post',
-			data: {function:"searchLib", codigo:codigo, tipo:tipo},
+			data: {function:"searchLib", value:value, tipo:tipo},
 			dataType: 'json',
 			success: function (data) {
 				if (data.success) {
@@ -257,7 +257,7 @@ $(document).ready(function(){
 
 //Función para buscar los registros de Guía o Tracking con el boton de Búsqueda
 	$('#search2').click(function(){		
-		var codigo = $('#guia').val();
+		var value = $('#guia').val();
 		var tipo = 'guia';
 		if (codigo == ""){
 			bootbox.alert ('Debe Escribir la Guía o Traking');
@@ -265,9 +265,9 @@ $(document).ready(function(){
 		}		
 		$('#lista > tbody').empty();	
 		$.ajax({
-			url: 'include/consultalib.php',
+			url: 'include/pdo/tipificacion.php',
 			type: 'post',
-			data: {codigo:codigo, tipo:tipo},
+			data: {function:"searchLib", value:value, tipo:tipo},
 			dataType: 'json',
 			success: function (data) {
 				if (data.success) {
@@ -319,7 +319,7 @@ $(document).ready(function(){
 			    	type: 'post',
 			    	dataType: "json",
 			    	data: {
-			     		function:"searchCode",
+			     		function:"autocompleteCode",
 			     		codigo: request.term
 			    	},
 			    	success: function( data ) {
@@ -341,7 +341,22 @@ $(document).ready(function(){
 	$(function(){
 		$('#guia').autocomplete({
 			minLength: 8,
-			source : 'include/buscar_guia.php',
+			minLength: 5,
+			source: function( request, response ) {
+			   	// Fetch data
+			   	$.ajax({
+			    	url: "include/pdo/tipificacion.php",
+			    	type: 'post',
+			    	dataType: "json",
+			    	data: {
+			     		function:"autocompleteGuide",
+			     		guia: request.term
+			    	},
+			    	success: function( data ) {
+			     		response(data);
+			    	}
+			   	});
+		  	},
 			select : function(event, ui){
 				$('#resultados').slideUp('slow', function(){
 					$('#resultados').html(

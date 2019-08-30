@@ -138,15 +138,15 @@ if(isset($_SESSION['user'])){
 	function searchLib(){
 		$tipo = $_POST['tipo'];
 		$objdatabase = new Database();
-		$codigo = $_POST['codigo'];
+		$value = $_POST['value'];
 		switch ($tipo) {
 			case "lib":
 				$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE libced =:libced ORDER BY fecha DESC");
-				$sql->bindParam(':libced', $codigo, PDO::PARAM_STR);
+				$sql->bindParam(':libced', $value, PDO::PARAM_STR);
 				break;
 			case "guia":
-				$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE guiatracking LIKE '%:guia%' ORDER BY fecha DESC");
-				$sql->bindParam(':guia', $codigo, PDO::PARAM_STR);
+				$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE guiatracking LIKE ? ORDER BY fecha DESC");
+				$sql->bindValue(1,"%{$value}%", PDO::PARAM_STR);
 				break;			
 			default:				
 				break;
@@ -176,11 +176,12 @@ if(isset($_SESSION['user'])){
 		}
 	}
 
-	function searchCode(){
+	// Search Code
+	function autocompleteCode(){
 		$objdatabase = new Database();
 		$codigo = $_POST['codigo'];
-		$sql = $objdatabase->prepare("SELECT DISTINCT libced FROM call_registro WHERE libced LIKE '%$codigo%' ORDER BY libced");
-		$sql->bindParam(':codigo', $codigo, PDO::PARAM_STR);
+		$sql = $objdatabase->prepare("SELECT DISTINCT libced FROM call_registro WHERE libced LIKE ? ORDER BY libced");
+		$sql->bindValue(1,"%{$codigo}%", PDO::PARAM_STR);
 		$sql->execute(); // se confirma que el query exista	
 		//Verificamos el resultado
 		$count = $sql->rowCount();
@@ -189,6 +190,26 @@ if(isset($_SESSION['user'])){
 			$result = $sql->fetchAll();
 			foreach ($result as $key => $value){
 				$json[] = array("value" => $value['libced']);
+			}
+			$json['success'] = true;
+			echo json_encode($json);
+		}
+	}
+
+	// Search Guide
+	function autocompleteGuide(){
+		$objdatabase = new Database();
+		$guia = $_POST['guia'];
+		$sql = $objdatabase->prepare("SELECT DISTINCT guiatracking FROM call_registro WHERE guiatracking LIKE ? ORDER BY guiatracking");
+		$sql->bindValue(1,"%{$guia}%", PDO::PARAM_STR);
+		$sql->execute(); // se confirma que el query exista	
+		//Verificamos el resultado
+		$count = $sql->rowCount();
+		if ($count){
+			$json = array();
+			$result = $sql->fetchAll();
+			foreach ($result as $key => $value){
+				$json[] = array("value" => $value['guiatracking']);
 			}
 			$json['success'] = true;
 			echo json_encode($json);
@@ -212,8 +233,14 @@ if(isset($_SESSION['user'])){
 		case "searchLib":
 			searchLib();
 			break;
-		case "searchCode":
-			searchCode();
+		case "searchGuide":
+			searchGuide();
+			break;			
+		case "autocompleteCode":
+			autocompleteCode();
+			break;
+		case "autocompleteGuide":
+			autocompleteGuide();
 			break;
 		default:
 			break;
