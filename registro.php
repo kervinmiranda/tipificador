@@ -37,7 +37,7 @@ $(document).ready(function(){
 		$('#submotivo').empty();		
 		$('#motivo option:selected').each(function () {
 			elegido=$(this).val();
-			$.post('include/pdo/registro.php', { function:"buscarSub", elegido:elegido }, function(data){
+			$.post('include/pdo/registro.php', { function:"searchSub", elegido:elegido }, function(data){
 				$('#submotivo').html(data);
 			});            
         });
@@ -212,7 +212,7 @@ $(document).ready(function(){
 		}		
 		$('#lista > tbody').empty();		
 		$.ajax({
-			url: 'include/pdo/tipificacion.php',
+			url: 'include/pdo/registro.php',
 			type: 'post',
 			data: {function:"searchLib", value:value, tipo:tipo},
 			dataType: 'json',
@@ -265,7 +265,7 @@ $(document).ready(function(){
 		}		
 		$('#lista > tbody').empty();	
 		$.ajax({
-			url: 'include/pdo/tipificacion.php',
+			url: 'include/pdo/registro.php',
 			type: 'post',
 			data: {function:"searchLib", value:value, tipo:tipo},
 			dataType: 'json',
@@ -315,7 +315,7 @@ $(document).ready(function(){
 			source: function( request, response ) {
 			   	// Fetch data
 			   	$.ajax({
-			    	url: "include/pdo/tipificacion.php",
+			    	url: "include/pdo/registro.php",
 			    	type: 'post',
 			    	dataType: "json",
 			    	data: {
@@ -345,7 +345,7 @@ $(document).ready(function(){
 			source: function( request, response ) {
 			   	// Fetch data
 			   	$.ajax({
-			    	url: "include/pdo/tipificacion.php",
+			    	url: "include/pdo/registro.php",
 			    	type: 'post',
 			    	dataType: "json",
 			    	data: {

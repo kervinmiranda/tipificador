@@ -9,6 +9,7 @@ session_start();
 if(isset($_SESSION['user'])){
 	$fecha = date('Y/m/d'); //Obtener la fecha del día	
 
+	//Get Tipifications
 	function getTipifications(){
 		$objdatabase = new Database();
 		$sql = $objdatabase->prepare("SELECT * FROM call_tipificacion");
@@ -134,87 +135,7 @@ if(isset($_SESSION['user'])){
 		echo $data;
 	}
 
-	//Search Lib o cédula
-	function searchLib(){
-		$tipo = $_POST['tipo'];
-		$objdatabase = new Database();
-		$value = $_POST['value'];
-		switch ($tipo) {
-			case "lib":
-				$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE libced =:libced ORDER BY fecha DESC");
-				$sql->bindParam(':libced', $value, PDO::PARAM_STR);
-				break;
-			case "guia":
-				$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE guiatracking LIKE ? ORDER BY fecha DESC");
-				$sql->bindValue(1,"%{$value}%", PDO::PARAM_STR);
-				break;			
-			default:				
-				break;
-		}
-		$sql->execute(); // se confirma que el query exista	
-		//Verificamos el resultado
-		$count = $sql->rowCount();
-		if ($count){
-			$json = array();
-			$result = $sql->fetchAll();
-			foreach ($result as $key => $value){
-				$fec = date_create($value['fecha']);
-				$json[] = array(
-					'fecha' => date_format($fec, 'd/m/Y h:i a'),
-					'usuario' => utf8_encode($value['usuario']),
-					'departamento' => utf8_encode($value['departamento']),
-					'motivo' => utf8_encode($value['motivo']),
-					'sub_motivo' => utf8_encode($value['sub_motivo']),
-					'libced' => utf8_encode($value['libced']),
-					'usersocial' => utf8_encode($value['usersocial']),
-					'guiatracking' => utf8_encode($value['guiatracking']),
-					'comentario' => utf8_encode($value['comentario'])
-				);
-			}
-			$json['success'] = true;
-			echo json_encode($json);
-		}
-	}
-
-	// Search Code
-	function autocompleteCode(){
-		$objdatabase = new Database();
-		$codigo = $_POST['codigo'];
-		$sql = $objdatabase->prepare("SELECT DISTINCT libced FROM call_registro WHERE libced LIKE ? ORDER BY libced");
-		$sql->bindValue(1,"%{$codigo}%", PDO::PARAM_STR);
-		$sql->execute(); // se confirma que el query exista	
-		//Verificamos el resultado
-		$count = $sql->rowCount();
-		if ($count){
-			$json = array();
-			$result = $sql->fetchAll();
-			foreach ($result as $key => $value){
-				$json[] = array("value" => $value['libced']);
-			}
-			$json['success'] = true;
-			echo json_encode($json);
-		}
-	}
-
-	// Search Guide
-	function autocompleteGuide(){
-		$objdatabase = new Database();
-		$guia = $_POST['guia'];
-		$sql = $objdatabase->prepare("SELECT DISTINCT guiatracking FROM call_registro WHERE guiatracking LIKE ? ORDER BY guiatracking");
-		$sql->bindValue(1,"%{$guia}%", PDO::PARAM_STR);
-		$sql->execute(); // se confirma que el query exista	
-		//Verificamos el resultado
-		$count = $sql->rowCount();
-		if ($count){
-			$json = array();
-			$result = $sql->fetchAll();
-			foreach ($result as $key => $value){
-				$json[] = array("value" => $value['guiatracking']);
-			}
-			$json['success'] = true;
-			echo json_encode($json);
-		}
-	}
+	
 
 	$function  = $_POST['function']; //Obtener la Opción a realizar (Nuevo, editar, bloquear)
 	switch ($function) {
@@ -229,19 +150,7 @@ if(isset($_SESSION['user'])){
 			break;
 		case "changeStatus":
 			changeStatus();
-			break;
-		case "searchLib":
-			searchLib();
-			break;
-		case "searchGuide":
-			searchGuide();
-			break;			
-		case "autocompleteCode":
-			autocompleteCode();
-			break;
-		case "autocompleteGuide":
-			autocompleteGuide();
-			break;
+			break;		
 		default:
 			break;
 	}
