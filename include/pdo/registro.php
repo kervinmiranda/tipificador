@@ -7,8 +7,7 @@ date_default_timezone_set('America/Caracas');
 include_once 'database.php';
 session_start();
 if(isset($_SESSION['user'])){
-	$fecha = date('Y/m/d'); //Obtener la fecha del día	
-	
+
 	//Search SubMotive
 	function searchSub(){
 		$motivo = utf8_decode($_POST['elegido']);
@@ -30,6 +29,7 @@ if(isset($_SESSION['user'])){
    				$data.= '<option value="'.$value['secundaria'].'">'.utf8_encode($value['secundaria']).'</option>';
    			}
 		}
+		$objdatabase = null;
 		echo $data;
 	}
 
@@ -73,6 +73,7 @@ if(isset($_SESSION['user'])){
 			$json['success'] = true;
 			echo json_encode($json);
 		}
+		$objdatabase = null;
 	}
 
 	// Search Code
@@ -93,6 +94,7 @@ if(isset($_SESSION['user'])){
 			$json['success'] = true;
 			echo json_encode($json);
 		}
+		$objdatabase = null;
 	}
 
 	// Search Guide
@@ -113,6 +115,97 @@ if(isset($_SESSION['user'])){
 			$json['success'] = true;
 			echo json_encode($json);
 		}
+		$objdatabase = null;
+	}
+
+	//New Register
+	function newRegister(){
+		$objdatabase = new Database();
+		$pais = utf8_decode($_POST['pais']);
+		$motivo = utf8_decode($_POST['motivo']);
+		$submotivo = utf8_decode($_POST['submotivo']);
+		$codigo = strtoupper(utf8_decode(str_replace(' ', '',$_POST['codigo'])));
+		$codigo = preg_replace('/\s+/', '', $codigo);
+		$guia = strtoupper(utf8_decode(str_replace(' ', '',$_POST['guia'])));
+		$guia = preg_replace('/\s+/', '', $guia);		
+		$comentario = utf8_decode(trim($_POST['comentario']));
+		switch($_SESSION['departamento']){
+			case 'REDES SOCIALES':
+				$socialuser = strtolower(utf8_decode(str_replace(' ', '',$_POST['socialuser'])));
+				$socialuser = str_replace('@', '', $socialuser);					
+				$socialuser = preg_replace('/\s+/', '', $socialuser);					
+			break;				
+			default:
+				$socialuser = '';					
+		}
+		$sql = $objdatabase->prepare("INSERT INTO call_registro (pais, fecha, usuario, departamento, motivo, sub_motivo, libced, usersocial, guiatracking, comentario, estatus) VALUES (:pais, :fecha, :userid, :departamento, :motivo, :submotivo, :codigo, :socialuser, :guia, :comentario, 1)");
+		$sql->bindParam(':pais', $pais, PDO::PARAM_STR);
+		$sql->bindParam(':fecha', date('Y/m/d'), PDO::PARAM_STR);
+		$sql->bindParam(':userid', $_SESSION['nick'], PDO::PARAM_STR);
+		$sql->bindParam(':departamento', utf8_decode($_SESSION['departamento']), PDO::PARAM_STR);
+		$sql->bindParam(':motivo', $motivo, PDO::PARAM_STR);
+		$sql->bindParam(':submotivo', $submotivo, PDO::PARAM_STR);
+		$sql->bindParam(':codigo', $codigo, PDO::PARAM_STR);
+		$sql->bindParam(':socialuser', $socialuser, PDO::PARAM_STR);
+		$sql->bindParam(':guia', $guia, PDO::PARAM_STR);
+		$sql->bindParam(':comentario', $comentario, PDO::PARAM_STR);
+		if ($sql->execute()) { 
+		   $data = $objdatabase->lastInsertId();
+		}else{
+			$data = "0";
+		}		
+		$objdatabase = null;
+		echo $data;
+	}
+
+	function lista(){
+		$objdatabase = new Database();
+		$fechabuscar = $_POST['fecha'];
+		if ($_SESSION['nivel'] < 3){
+			$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE fecha LIKE ?");			
+		}else{	
+			$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE usuario = '$userid' AND fecha LIKE ?");
+			$sql->bindParam(':userid', $_SESSION['nick'], PDO::PARAM_STR);
+		}
+		$sql->bindValue(1,"%{$fechabuscar}%", PDO::PARAM_STR);
+		$sql->execute(); // se confirma que el query exista
+		//Verificamos el resultado
+		$count = $sql->rowCount();
+		$data = array();
+		if ($count){
+			$result = $sql->fetchAll();
+			foreach ($result as $key => $value){
+				$id = $value['id'];
+				$link = '<a class="link" href="#" id="'.$id.'" data-toggle="modal" data-placement="bottom" data-target="#observacion">'.$id.'</a>';
+				$fecha = $value['fecha'];
+				$usuario = utf8_encode($value['usuario']);
+				$departamento =  utf8_encode($value['departamento']);
+				$motivo = utf8_encode($value['motivo']);
+				$sub_motivo = utf8_encode($value['sub_motivo']);
+				$libced = utf8_encode($value['libced']);
+				$users = utf8_encode($value['usersocial']);
+					$findme   = '|';
+					$pos = strpos($users, $findme);
+					if ($pos === false) {
+						$usersocial = $users;
+					}else{
+						if ($users != ''){
+							$user = substr($users,0, $pos);
+							$red = substr($users,$pos + 1, strlen($users));
+							$usersocial = $user.'@'.$red;
+						}else{
+							$usersocial = '';
+						}
+					}
+				$guiatracking = utf8_encode($value['guiatracking']);
+				$estatus = utf8_encode($value['estatus']);
+				$comentario =  utf8_encode($value['comentario']);
+				$edit = '<img src="imagenes/gestion.png" class="edit cursor" id="'.$id.'" data-toggle="modal" data-placement="bottom" data-target="#editar" title="Editar Registro">';
+				$data[] = array($link, $fecha, $usuario, $departamento, $motivo, $sub_motivo, $libced, $usersocial, $guiatracking, $edit);
+			}			
+		}
+		$results = array("aaData"=>$data);
+		echo json_encode($results);
 	}
 	
 
@@ -129,6 +222,12 @@ if(isset($_SESSION['user'])){
 			break;
 		case "autocompleteGuide":
 			autocompleteGuide();
+			break;
+		case "newRegister":
+			newRegister();
+			break;
+		case "lista":
+			lista();
 			break;
 		default:
 			break;

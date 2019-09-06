@@ -15,6 +15,7 @@ if(isset($_SESSION['user'])){
 <link rel="stylesheet" href="../DataTables/css/responsive.bootstrap.min.css">
 <link rel="stylesheet" href="../bootstrap/css/bootstrap-submenu.css">
 <link rel="stylesheet" href="css/call.css">
+
 <!-- Archivos JavaScript -->
 <script src="../js/jquery.js"></script>
 <script src="js/jquery-ui.js"></script>
@@ -29,6 +30,7 @@ if(isset($_SESSION['user'])){
 <script type="text/javascript">
 
 $(document).ready(function(){
+	
 //Activar Menú
 	$("#menu3").attr('class','active');
 
@@ -95,7 +97,6 @@ $(document).ready(function(){
 		if (contador < 1 ){		
 			bootbox.confirm('¿Seguro que Desea Cargar el Registro?', function(result){
 				if (result == true){		
-					accion = 'nuevo';
 					pais = $('#pais').val();
 					motivo = $('#motivo').val();
 					submotivo = $('#submotivo').val();
@@ -107,7 +108,7 @@ $(document).ready(function(){
 					dia_aux = d.getDay() + 2;	// parche por diferencia de hora server
 					fecha = dia_aux+'/'+mes+'/'+d.getFullYear()+' '+d.getHours()+':'+d.getUTCHours()+':'+d.getMinutes()+':'+d.getSeconds();
 
-					$.post('include/guardar_registro.php', {accion:accion , pais:pais, fecha:fecha, motivo:motivo, submotivo:submotivo, codigo:codigo, guia:guia, socialuser:socialuser, comentario:comentario}, function(data){
+					$.post('include/pdo/registro.php', {function:"newRegister", pais:pais, fecha:fecha, motivo:motivo, submotivo:submotivo, codigo:codigo, guia:guia, socialuser:socialuser, comentario:comentario}, function(data){
 							id = data;
 						if (id == 0){
 							$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Error al incluir los datos, Intente más tarde</div>');
