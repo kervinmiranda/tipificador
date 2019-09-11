@@ -135,24 +135,62 @@ if(isset($_SESSION['user'])){
 		echo $data;
 	}
 
-	
+	function getMotives(){
+		$objdatabase = new Database();
+		$sql = $objdatabase->prepare("SELECT DISTINCT principal FROM call_tipificacion WHERE estatus = 1");
+		//Exjecutamos la Query
+		$sql->execute(); // se confirma que el query exista
+		//Verificamos el resultado
+		$count = $sql->rowCount();
+		$data = null;		
+		if($count){
+			$data = $sql->fetchAll();					
+		}
+		$objdatabase = null;
+		return $data;
+	}
 
-	$function  = $_POST['function']; //Obtener la Opción a realizar (Nuevo, editar, bloquear)
-	switch ($function) {
-		case "getTipifications":
-			getTipifications();
-			break;
-		case "newTipification":
-			newTipification();
-			break;
-		case "editTipification":
-			editTipification();
-			break;
-		case "changeStatus":
-			changeStatus();
-			break;		
-		default:
-			break;
+	function getSubMotives(){
+		$objdatabase = new Database();
+		$sql = $objdatabase->prepare("SELECT principal, secundaria FROM call_tipificacion WHERE estatus = 1 ORDER BY principal, secundaria");
+		//Exjecutamos la Query
+		$sql->execute(); // se confirma que el query exista
+		//Verificamos el resultado
+		$count = $sql->rowCount();
+		$data = null;		
+		if($count){
+			$data = $sql->fetchAll();					
+		}
+		$objdatabase = null;
+		return $data;
+	}
+
+	//Search SubMotive
+	function searchSub(){
+
+	}
+
+	if (isset($_POST['function'])){
+	$function  = $_POST['function']; //Obtener la Opción a realizar (Nuevo, editar, bloquear)	
+		switch ($function) {
+			case "getTipifications":
+				getTipifications();
+				break;
+			case "newTipification":
+				newTipification();
+				break;
+			case "editTipification":
+				editTipification();
+				break;
+			case "changeStatus":
+				changeStatus();
+				break;
+			case "searchSub":
+				searchSub();
+				break;
+			default:
+				break;
+		}
 	}
 
 }else{

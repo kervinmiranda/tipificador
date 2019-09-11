@@ -2,10 +2,18 @@
 /*************************************************************************************************************************
                                                          SISTEMA GEBNET
 ****************************************************************************************************************************/
-include_once 'include/pdo/consultas.php';
+include_once 'include/pdo/paises.php';
+include_once 'include/pdo/tipificacion.php';
 include_once 'include/fecha.php';
 include_once 'include/variables.php';
 if(isset($_SESSION['user'])){
+	$paises = getPaises();
+	$motivos = getMotives();	
+	$subMotives = getSubMotives();
+	$data = array();
+	foreach ($subMotives as $key => $value){
+		$data[] = array($value['principal'], $value['secundaria']);
+	}
 ?>
 <?php echo $doctype?>
 <!-- Achivos CSS -->
@@ -30,18 +38,15 @@ if(isset($_SESSION['user'])){
 <script type="text/javascript">
 
 $(document).ready(function(){
-	
 //Activar Menú
 	$("#menu3").attr('class','active');
 
 //Función para buscar los submotivos despues de seleccionar un motivo
-	$('#motivo').change(function () {
+	$('#motivo').change(function () {		
 		$('#submotivo').empty();		
 		$('#motivo option:selected').each(function () {
 			elegido=$(this).val();
-			$.post('include/pdo/registro.php', { function:"searchSub", elegido:elegido }, function(data){
-				$('#submotivo').html(data);
-			});            
+				$('#submotivo').html("<option>hello</option>");       
         });
    });
   
@@ -391,14 +396,12 @@ $(document).ready(function(){
                 <label for="pais">País</label>  
                 <select name="pais" id="pais" class="form-control validar">
                 <option>Seleccionar...</option>
-                <?php
-                    $paises = getPaises();
+                <?php                    
                     if (!is_null($paises)){
                			foreach ($paises as $key => $value){
                				echo '<option>'.utf8_encode($value['descripcion']).'</option>';
                			}
                		}
-
                 ?>            
                 </select>      	                
             </div>
@@ -406,8 +409,7 @@ $(document).ready(function(){
 				<label for="motivo">Motivo de Contacto</label>  
                 <select name="motivo" id="motivo" class="form-control validar">
                 <option>Seleccionar...</option>
-                <?php
-                    $motivos = getMotivos();
+                <?php                    
                     if (!is_null($motivos)){
                			foreach ($motivos as $key => $value){
                				echo '<option>'.utf8_encode($value['principal']).'</option>';

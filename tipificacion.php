@@ -3,7 +3,7 @@
                                                          SISTEMA GEBNET
 ****************************************************************************************************************************/
 require 'include/pdo/database.php';
-include_once 'include/pdo/consultas.php';
+include_once 'include/pdo/tipificacion.php';
 include_once 'include/fecha.php';
 include_once 'include/variables.php';
 if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){

@@ -2,7 +2,6 @@
 /***************************************************************************************************************************
                                                          SISTEMA GEBNET
 ****************************************************************************************************************************/
-include_once 'include/pdo/consultas.php';
 include_once 'include/fecha.php';
 include_once 'include/variables.php';
 if(isset($_SESSION['user'])){
@@ -39,7 +38,7 @@ $(document).ready(function(){
 	//Función para buscar Comentario de la Gestión
 	$('#lista tbody').on('click', '.link', function(){
 		id = ($(this).attr('id'));
-			$.post('include/pdo/registo.php', {id:id, function:"searchId"}, function(data){
+			$.post('include/pdo/registro.php', {id:id, function:"searchId"}, function(data){
 			$('#registro').html('Registro: ' + id);
 			$('#comen').html(data);
 		});//End post
@@ -49,7 +48,7 @@ $(document).ready(function(){
 	$("#motivo").change(function () {
            $("#motivo option:selected").each(function () {
             elegido=$(this).val();
-            $.post("include/buscar_sub2.php", { elegido: elegido }, function(data){
+            $.post('include/pdo/registro.php', { function:"searchSub", elegido:elegido }, function(data){
             $("#submotivo").html(data);
             });
         });
@@ -195,7 +194,7 @@ $(document).ready(function(){
 	$('#lista').dataTable({
 		"bDestroy": true,
 		"ajax": {
-    		"url": "include/pdo/registro",
+    		"url": "include/pdo/registro.php",
     		"data": { 
                 fecha:fecha,
                 function:"lista"

@@ -26,7 +26,7 @@ if(isset($_SESSION['user'])){
 		if ($count){
 			$result = $sql->fetchAll();
 			foreach ($result as $key => $value){
-   				$data.= '<option value="'.$value['secundaria'].'">'.utf8_encode($value['secundaria']).'</option>';
+   				$data.= '<option value="'.utf8_encode($value['secundaria']).'">'.utf8_encode($value['secundaria']).'</option>';
    			}
 		}
 		$objdatabase = null;
@@ -158,6 +158,7 @@ if(isset($_SESSION['user'])){
 		echo $data;
 	}
 
+	// Tipifications List
 	function lista(){
 		$objdatabase = new Database();
 		$fechabuscar = $_POST['fecha'];
@@ -207,6 +208,24 @@ if(isset($_SESSION['user'])){
 		$results = array("aaData"=>$data);
 		echo json_encode($results);
 	}
+
+	//Search Register by Id
+	function searchId(){
+		$id = 
+		$objdatabase = new Database();
+		$sql = $objdatabase->prepare("SELECT comentario FROM call_registro WHERE id =:id");
+		$sql->bindParam(':id', $_POST['id'], PDO::PARAM_STR);
+		$sql->execute(); // se confirma que el query exista	
+		//Verificamos el resultado
+		$count = $sql->rowCount();
+		if ($count){
+			$data = utf8_encode($sql->fetchColumn());
+		}else{
+			$data = 'Sin Comentario';
+		}
+		$objdatabase = null;
+		echo $data;
+	}
 	
 
 	$function  = $_POST['function']; //Obtener la Opción a realizar (Nuevo, editar, bloquear)
@@ -228,6 +247,9 @@ if(isset($_SESSION['user'])){
 			break;
 		case "lista":
 			lista();
+			break;
+		case "searchId":
+			searchId();
 			break;
 		default:
 			break;
