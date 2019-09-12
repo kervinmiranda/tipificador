@@ -8,31 +8,6 @@ include_once 'database.php';
 session_start();
 if(isset($_SESSION['user'])){
 
-	//Search SubMotive
-	function searchSub(){
-		$motivo = utf8_decode($_POST['elegido']);
-		$objdatabase = new Database();
-		$data = "";
-		if ($motivo == "TODOS"){
-			$sql = $objdatabase->prepare("SELECT DISTINCT secundaria FROM call_tipificacion WHERE estatus = '1' ORDER BY secundaria ASC ");	
-		}else{
-			$sql = $objdatabase->prepare("SELECT secundaria FROM call_tipificacion WHERE principal =:motivo AND estatus = '1' ORDER BY secundaria ASC");
-			//Definimos los parametros de la Query
-			$sql->bindParam(':motivo', $motivo, PDO::PARAM_STR);
-		}
-		$sql->execute();
-		//Verificamos el resultado
-		$count = $sql->rowCount();
-		if ($count){
-			$result = $sql->fetchAll();
-			foreach ($result as $key => $value){
-   				$data.= '<option value="'.utf8_encode($value['secundaria']).'">'.utf8_encode($value['secundaria']).'</option>';
-   			}
-		}
-		$objdatabase = null;
-		echo $data;
-	}
-
 	//Search Lib o cédula
 	function searchLib(){
 		$tipo = $_POST['tipo'];
@@ -60,14 +35,14 @@ if(isset($_SESSION['user'])){
 				$fec = date_create($value['fecha']);
 				$json[] = array(
 					'fecha' => date_format($fec, 'd/m/Y h:i a'),
-					'usuario' => utf8_encode($value['usuario']),
-					'departamento' => utf8_encode($value['departamento']),
-					'motivo' => utf8_encode($value['motivo']),
-					'sub_motivo' => utf8_encode($value['sub_motivo']),
-					'libced' => utf8_encode($value['libced']),
-					'usersocial' => utf8_encode($value['usersocial']),
-					'guiatracking' => utf8_encode($value['guiatracking']),
-					'comentario' => utf8_encode($value['comentario'])
+					'usuario' => $value['usuario'],
+					'departamento' => $value['departamento'],
+					'motivo' => $value['motivo'],
+					'sub_motivo' => $value['sub_motivo'],
+					'libced' => $value['libced'],
+					'usersocial' => $value['usersocial'],
+					'guiatracking' => $value['guiatracking'],
+					'comentario' => $value['comentario']
 				);
 			}
 			$json['success'] = true;
@@ -119,19 +94,19 @@ if(isset($_SESSION['user'])){
 	}
 
 	//New Register
-	function newRegister(){
+	function insertRegister(){
 		$objdatabase = new Database();
-		$pais = utf8_decode($_POST['pais']);
-		$motivo = utf8_decode($_POST['motivo']);
-		$submotivo = utf8_decode($_POST['submotivo']);
-		$codigo = strtoupper(utf8_decode(str_replace(' ', '',$_POST['codigo'])));
+		$pais = $_POST['pais'];
+		$motivo = $_POST['motivo'];
+		$submotivo = $_POST['submotivo'];
+		$codigo = strtoupper(str_replace(' ', '',$_POST['codigo']));
 		$codigo = preg_replace('/\s+/', '', $codigo);
-		$guia = strtoupper(utf8_decode(str_replace(' ', '',$_POST['guia'])));
+		$guia = strtoupper(str_replace(' ', '',$_POST['guia']));
 		$guia = preg_replace('/\s+/', '', $guia);		
-		$comentario = utf8_decode(trim($_POST['comentario']));
+		$comentario = trim($_POST['comentario']);
 		switch($_SESSION['departamento']){
 			case 'REDES SOCIALES':
-				$socialuser = strtolower(utf8_decode(str_replace(' ', '',$_POST['socialuser'])));
+				$socialuser = strtolower(str_replace(' ', '',$_POST['socialuser']));
 				$socialuser = str_replace('@', '', $socialuser);					
 				$socialuser = preg_replace('/\s+/', '', $socialuser);					
 			break;				
@@ -142,7 +117,7 @@ if(isset($_SESSION['user'])){
 		$sql->bindParam(':pais', $pais, PDO::PARAM_STR);
 		$sql->bindParam(':fecha', date('Y/m/d'), PDO::PARAM_STR);
 		$sql->bindParam(':userid', $_SESSION['nick'], PDO::PARAM_STR);
-		$sql->bindParam(':departamento', utf8_decode($_SESSION['departamento']), PDO::PARAM_STR);
+		$sql->bindParam(':departamento', $_SESSION['departamento'], PDO::PARAM_STR);
 		$sql->bindParam(':motivo', $motivo, PDO::PARAM_STR);
 		$sql->bindParam(':submotivo', $submotivo, PDO::PARAM_STR);
 		$sql->bindParam(':codigo', $codigo, PDO::PARAM_STR);
@@ -155,6 +130,37 @@ if(isset($_SESSION['user'])){
 			$data = "0";
 		}		
 		$objdatabase = null;
+		return $data;
+	}
+
+	//Insert Incidence
+	function insertIncidence($id){
+		$objdatabase = new Database();
+		$sql = $objdatabase->prepare("INSERT INTO call_incidencia (id) VALUES (:id)");
+		$sql->bindParam(':id', $id, PDO::PARAM_STR);
+		if ($sql->execute()) { 
+		   $data = $objdatabase->lastInsertId();
+		}else{
+			$data = "0";
+		}		
+		$objdatabase = null;
+		return $data;
+	}
+	
+	//New Register
+	function newRegister(){
+		$data = insertRegister();
+		echo $data;
+	}
+
+	//New Register And Incidence
+	function newRegisterIncidence(){
+		$data = "0";
+		$insert = insertRegister();
+		if ($insert != "0"){
+			insertIncidence($insert);
+			$data = $insert;
+		}
 		echo $data;
 	}
 
@@ -179,12 +185,12 @@ if(isset($_SESSION['user'])){
 				$id = $value['id'];
 				$link = '<a class="link" href="#" id="'.$id.'" data-toggle="modal" data-placement="bottom" data-target="#observacion">'.$id.'</a>';
 				$fecha = $value['fecha'];
-				$usuario = utf8_encode($value['usuario']);
-				$departamento =  utf8_encode($value['departamento']);
-				$motivo = utf8_encode($value['motivo']);
-				$sub_motivo = utf8_encode($value['sub_motivo']);
-				$libced = utf8_encode($value['libced']);
-				$users = utf8_encode($value['usersocial']);
+				$usuario = $value['usuario'];
+				$departamento =  $value['departamento'];
+				$motivo = $value['motivo'];
+				$sub_motivo = $value['sub_motivo'];
+				$libced = $value['libced'];
+				$users = $value['usersocial'];
 					$findme   = '|';
 					$pos = strpos($users, $findme);
 					if ($pos === false) {
@@ -198,9 +204,9 @@ if(isset($_SESSION['user'])){
 							$usersocial = '';
 						}
 					}
-				$guiatracking = utf8_encode($value['guiatracking']);
-				$estatus = utf8_encode($value['estatus']);
-				$comentario =  utf8_encode($value['comentario']);
+				$guiatracking = $value['guiatracking'];
+				$estatus = $value['estatus'];
+				$comentario =  $value['comentario'];
 				$edit = '<img src="imagenes/gestion.png" class="edit cursor" id="'.$id.'" data-toggle="modal" data-placement="bottom" data-target="#editar" title="Editar Registro">';
 				$data[] = array($link, $fecha, $usuario, $departamento, $motivo, $sub_motivo, $libced, $usersocial, $guiatracking, $edit);
 			}			
@@ -219,7 +225,7 @@ if(isset($_SESSION['user'])){
 		//Verificamos el resultado
 		$count = $sql->rowCount();
 		if ($count){
-			$data = utf8_encode($sql->fetchColumn());
+			$data = $sql->fetchColumn();
 		}else{
 			$data = 'Sin Comentario';
 		}
@@ -230,9 +236,6 @@ if(isset($_SESSION['user'])){
 
 	$function  = $_POST['function']; //Obtener la Opción a realizar (Nuevo, editar, bloquear)
 	switch ($function) {
-		case "searchSub":
-			searchSub();
-			break;
 		case "searchLib":
 			searchLib();
 			break;
@@ -245,6 +248,8 @@ if(isset($_SESSION['user'])){
 		case "newRegister":
 			newRegister();
 			break;
+		case "newRegisterIncidence":
+			newRegisterIncidence();
 		case "lista":
 			lista();
 			break;

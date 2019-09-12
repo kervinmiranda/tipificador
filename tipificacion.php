@@ -264,7 +264,7 @@ $(document).ready(function(){
                             <?php	                           		
                            		if (!is_null($motives )){
                            			foreach ($motives as $key => $value){
-                           				echo '<option>'.utf8_encode($value['principal']).'</option>';
+                           				echo '<option>'.$value['principal'].'</option>';
                            			}
                            		}
 	                        ?>                            
@@ -303,7 +303,7 @@ $(document).ready(function(){
                             <?php	                           		
                            		if (!is_null($motives )){
                            			foreach ($motives as $key => $value){
-                           				echo '<option>'.utf8_encode($value['principal']).'</option>';
+                           				echo '<option>'.$value['principal'].'</option>';
                            			}
                            		}
 	                        ?>

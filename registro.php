@@ -9,11 +9,7 @@ include_once 'include/variables.php';
 if(isset($_SESSION['user'])){
 	$paises = getPaises();
 	$motivos = getMotives();	
-	$subMotives = getSubMotives();
-	$data = array();
-	foreach ($subMotives as $key => $value){
-		$data[] = array($value['principal'], $value['secundaria']);
-	}
+	$submotivos = getSubMotives();
 ?>
 <?php echo $doctype?>
 <!-- Achivos CSS -->
@@ -41,12 +37,21 @@ $(document).ready(function(){
 //Activar Menú
 	$("#menu3").attr('class','active');
 
+//Parse Array de Submotivos
+var obj = jQuery.parseJSON('<?php echo json_encode($submotivos)?>');
+
 //Función para buscar los submotivos despues de seleccionar un motivo
 	$('#motivo').change(function () {		
-		$('#submotivo').empty();		
+		$('#submotivo').empty();
+		$('#submotivo').append("<option>Seleccionar...</option>")	
 		$('#motivo option:selected').each(function () {
-			elegido=$(this).val();
-				$('#submotivo').html("<option>hello</option>");       
+			elegido=$(this).val();			
+        	//Buscamos los submotivos
+        	$.each(obj, function(i,item){
+        		if (elegido == obj[i].principal){
+        			$('#submotivo').append("<option>"+ obj[i].secundaria +"</option>")
+        		}				
+			})
         });
    });
   
@@ -54,11 +59,10 @@ $(document).ready(function(){
 	$('#socialuser').keypress(function(e){
 		validarKey(e);
 	});
-           
+  
 //Función para Guardar Tipificación 
    $('#boton1').click(function (){
 	 var contador = 0;
-
 		var d = new Date();
 		var dia = new Array(7);
 		dia[0] = "Domingo";
@@ -113,7 +117,13 @@ $(document).ready(function(){
 					dia_aux = d.getDay() + 2;	// parche por diferencia de hora server
 					fecha = dia_aux+'/'+mes+'/'+d.getFullYear()+' '+d.getHours()+':'+d.getUTCHours()+':'+d.getMinutes()+':'+d.getSeconds();
 
-					$.post('include/pdo/registro.php', {function:"newRegister", pais:pais, fecha:fecha, motivo:motivo, submotivo:submotivo, codigo:codigo, guia:guia, socialuser:socialuser, comentario:comentario}, function(data){
+					if ($('#incidencia').is(':checked')){
+						funcion = "newRegisterIncidence";
+					}else{
+						funcion = "newRegister";
+					}
+
+					$.post('include/pdo/registro.php', {function:funcion, pais:pais, fecha:fecha, motivo:motivo, submotivo:submotivo, codigo:codigo, guia:guia, socialuser:socialuser, comentario:comentario}, function(data){
 							id = data;
 						if (id == 0){
 							$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Error al incluir los datos, Intente más tarde</div>');
@@ -122,6 +132,7 @@ $(document).ready(function(){
 							$('#formulario input').val('').parent().removeClass('has-error has-success');
 							$('#formulario textarea').val('').parent().removeClass('has-error has-success');
 							$('#formulario select').prop('selectedIndex',0).parent().removeClass('has-error has-success');
+
 							$('#motivo').change();
 						}//End if
 					});//End post
@@ -129,84 +140,6 @@ $(document).ready(function(){
 			});//End Function bootbox
 		}//End if contador == 0
 	});//End Function
-	
-
-//Función para Guardar Tipificación e Incidencia
-	$('#boton2').click(function (){
-		var contador = 0;  	 
-
-		var d=new Date();
-		var dia=new Array(7);
-		dia[0]="Domingo";
-		dia[1]="Lunes";
-		dia[2]="Martes";
-		dia[3]="Miercoles";
-		dia[4]="Jueves";
-		dia[5]="Viernes";
-		dia[6]="Sabado";
-
-		var mes= d.getMonth()+1;
-		var dia_aux = 0;
-
-	  	$("#formulario input").filter('.validar').each(function (index) { 
-        	if ($(this).val() == ''){
-				$(this).parent().addClass('has-error');
-				contador++;							
-			}else{
-				$(this).parent().removeClass('has-error has-warning').addClass('has-success');
-			}//End if	
-     	});//End each
-		
-		$("#formulario select").filter('.validar').each(function (index) { 
-     		if ($("option:selected", this).prop('index') == 0){
-				$(this).parent().addClass('has-error');
-				contador++;							
-			}else{
-				$(this).parent().removeClass('has-error has-warning').addClass('has-success');
-			}//End if
-		});//End each
-		
-		$("#formulario textarea").filter('.validar').each(function (index) { 
-        	if ($(this).val() == ''){
-				$(this).parent().addClass('has-error');
-				contador++;							
-			}else{
-				$(this).parent().removeClass('has-error has-warning').addClass('has-success');
-			}//End if	
-     	});//End each
-		
-		if (contador < 1 ){	
-			bootbox.confirm('¿Seguro que Desea Cargar el Registro e Incidencia?', function(result){
-				if (result == true){
-					accion = 'incidencia';
-					pais = $('#pais').val();
-					motivo = $('#motivo').val();
-					submotivo = $('#submotivo').val();
-					codigo = $('#codigo').val();
-					socialuser = $('#socialuser').val() + '|' + $('#red').val();;
-					guia = $('#guia').val();
-					comentario = $('#comentario').val();
-
-					dia_aux = d.getDay() + 2;	// parche por diferencia de hora server
-					fecha = dia_aux+'/'+mes+'/'+d.getFullYear()+' '+d.getHours()+':'+d.getUTCHours()+':'+d.getMinutes()+':'+d.getSeconds();
-
-					$.post('include/guardar_registro.php', {accion:accion, pais:pais, fecha:fecha, motivo:motivo,submotivo:submotivo,codigo:codigo,socialuser:socialuser, guia:guia, comentario:comentario}, function(data){
-					id = data;
-						if (id == 0){
-							$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Error al incluir los datos, Intente más tarde</div>');
-						}else{
-							$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Exito!</strong> Tipificación e incidencia Ingresadas Correctamente con el N°: <strong>'+id+'</strong> '+dia[d.getDay()]+' '+d.getDay()+'/'+mes+'/'+d.getFullYear()+' '+d.getHours()+':'+d.getUTCHours()+':'+d.getMinutes()+':'+d.getSeconds()+'</div>');
-
-							$('#formulario input').val('').parent().removeClass('has-error has-success');
-							$('#formulario textarea').val('').parent().removeClass('has-error has-success');
-							$('#formulario select').prop('selectedIndex',0).parent().removeClass('has-error has-success');
-							$('#motivo').change();									
-						}//End if		
-					});//End post
-				}//Enf if
-			});//End Function bootbox
-		}//End if Contador == 0
-	});//End Function	
 
 //Función para buscar los registros de cedulas o lib con el boton de busqueda
 	$('#search').click(function(){		
@@ -399,7 +332,7 @@ $(document).ready(function(){
                 <?php                    
                     if (!is_null($paises)){
                			foreach ($paises as $key => $value){
-               				echo '<option>'.utf8_encode($value['descripcion']).'</option>';
+               				echo '<option>'.$value['descripcion'].'</option>';
                			}
                		}
                 ?>            
@@ -412,7 +345,7 @@ $(document).ready(function(){
                 <?php                    
                     if (!is_null($motivos)){
                			foreach ($motivos as $key => $value){
-               				echo '<option>'.utf8_encode($value['principal']).'</option>';
+               				echo '<option>'.$value['principal'].'</option>';
                			}
                		}
                 ?>            
@@ -474,8 +407,12 @@ $(document).ready(function(){
             </div>
             </form>  
 			<div class="form-group col-xs-12">
-            <input type="image" src="imagenes/save.png" name="enviar" id="boton1" data-toggle="tooltip" data-placement="bottom" title="Guardar" class="imagen">
-			<input type="image" src="imagenes/alert.png" name="enviar" id="boton2" data-toggle="tooltip" data-placement="bottom" title="Guardar y Agregar a Incidencias" class="imagen">
+	            <input type="image" src="imagenes/save.png" name="enviar" id="boton1" data-toggle="tooltip" data-placement="bottom" title="Guardar" class="imagen">
+	            <!-- Material unchecked -->
+				<div class="form-check">
+				    <input type="checkbox" class="form-check-input" id="incidencia">
+				    <label class="form-check-label" for="materialUnchecked">Agregar a Incidencias</label>
+				</div>
             </div>                        	         
 		</div><!--End Pannel Body-->
   	</div><!--End col -->

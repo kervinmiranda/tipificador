@@ -21,9 +21,9 @@ if(isset($_SESSION['user'])){
 			$data = array();
 			foreach ($result as $key => $value){
 				$id = $value['id'];
-				$motivo = utf8_encode($value['principal']);
-				$sub_motivo = utf8_encode($value['secundaria']);
-				$est = utf8_encode($value['estatus']);
+				$motivo = $value['principal'];
+				$sub_motivo = $value['secundaria'];
+				$est = $value['estatus'];
 				switch ($est){
 					case 0: $estatus = '<img src="imagenes/inactivo.png">';
 							$block='<img src="imagenes/block2.png" class="camb cursor" title="Desbloquear Tipificación" id="'.$id.'│'.$est.'">';
@@ -44,8 +44,8 @@ if(isset($_SESSION['user'])){
 
 	//New Tipification
 	function newTipification(){
-		$motivo = utf8_decode(strtoupper($_POST['motivo']));
-		$sub_motivo = utf8_decode(strtoupper($_POST['sub_motivo']));
+		$motivo = strtoupper($_POST['motivo']);
+		$sub_motivo = strtoupper($_POST['sub_motivo']);
 		$exists = searchTipification($motivo, $sub_motivo);
 		if ($exists ==  false){
 			$objdatabase = new Database();
@@ -69,8 +69,8 @@ if(isset($_SESSION['user'])){
 	// Edit Tipification
 	function editTipification(){
 		$id = $_POST['id'];
-		$motivo = utf8_decode(strtoupper($_POST['motivo']));
-		$sub_motivo = utf8_decode(strtoupper($_POST['sub_motivo']));
+		$motivo = strtoupper($_POST['motivo']);
+		$sub_motivo = strtoupper($_POST['sub_motivo']);
 		$exists = searchTipification($motivo, $sub_motivo);
 		if ($exists ==  false){
 			$objdatabase = new Database();
@@ -135,6 +135,7 @@ if(isset($_SESSION['user'])){
 		echo $data;
 	}
 
+	// Get Motives
 	function getMotives(){
 		$objdatabase = new Database();
 		$sql = $objdatabase->prepare("SELECT DISTINCT principal FROM call_tipificacion WHERE estatus = 1");
@@ -150,6 +151,7 @@ if(isset($_SESSION['user'])){
 		return $data;
 	}
 
+	// Get Sub Motives
 	function getSubMotives(){
 		$objdatabase = new Database();
 		$sql = $objdatabase->prepare("SELECT principal, secundaria FROM call_tipificacion WHERE estatus = 1 ORDER BY principal, secundaria");
@@ -159,19 +161,14 @@ if(isset($_SESSION['user'])){
 		$count = $sql->rowCount();
 		$data = null;		
 		if($count){
-			$data = $sql->fetchAll();					
+			$data = $sql->fetchAll(PDO::FETCH_ASSOC);					
 		}
 		$objdatabase = null;
 		return $data;
 	}
 
-	//Search SubMotive
-	function searchSub(){
-
-	}
-
 	if (isset($_POST['function'])){
-	$function  = $_POST['function']; //Obtener la Opción a realizar (Nuevo, editar, bloquear)	
+		$function  = $_POST['function']; //Obtener la Opción a realizar
 		switch ($function) {
 			case "getTipifications":
 				getTipifications();
