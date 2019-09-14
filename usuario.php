@@ -3,11 +3,11 @@
                                                          SISTEMA GEBNET
 ****************************************************************************************************************************/
 require 'include/pdo/database.php';
-include_once 'include/pdo/consultas.php';
+include_once 'include/pdo/modulos.php';
 include_once 'include/fecha.php';
 include_once 'include/variables.php';
 if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
-	$modules = getModulos();
+	$modules = getModules();
 ?>
 <?php echo $doctype?>
 
@@ -456,7 +456,7 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 	                            <?php	                           		
 	                           		if (!is_null($modules )){
 	                           			foreach ($modules as $key => $value){
-	                           				echo '<option value="'.$value['id'].'">'.utf8_encode($value['descripcion']).'</option>';
+	                           				echo '<option value="'.$value['id'].'">'.$value['descripcion'].'</option>';
 	                           			}
 	                           		}
 	                           ?>
@@ -522,7 +522,7 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 	                           <?php	                           		
 	                           		if (!is_null($modules )){
 	                           			foreach ($modules as $key => $value){
-	                           				echo '<option value="'.$value['id'].'">'.utf8_encode($value['descripcion']).'</option>';
+	                           				echo '<option value="'.$value['id'].'">'.$value['descripcion'].'</option>';
 	                           			}
 	                           		}
 	                           ?>

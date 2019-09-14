@@ -2,9 +2,12 @@
 /***************************************************************************************************************************
                                                          SISTEMA GEBNET
 ****************************************************************************************************************************/
+include_once 'include/pdo/tipificacion.php';
 include_once 'include/fecha.php';
 include_once 'include/variables.php';
 if(isset($_SESSION['user'])){
+	$motivos = getMotives();	
+	$submotivos = getSubMotives();
 ?>
 <?php echo $doctype?>
 <!-- Achivos CSS -->
@@ -12,6 +15,7 @@ if(isset($_SESSION['user'])){
 <link rel="stylesheet" href="../bootstrap/css/bootstrap.css">
 <link rel="stylesheet" href="../DataTables/css/dataTables.bootstrap.css">
 <link rel="stylesheet" href="../DataTables/css/responsive.bootstrap.min.css">
+<link rel="stylesheet" href="../DataTables/css/buttons.dataTables.min.css">  
 <link rel="stylesheet" href="../bootstrap/css/bootstrap-submenu.css">
 <link rel="stylesheet" href="css/call.css">
 
@@ -22,6 +26,13 @@ if(isset($_SESSION['user'])){
 <script src="../DataTables/js/jquery.dataTables.js"></script>
 <script src="../DataTables/js/dataTables.bootstrap.js"></script>
 <script src="../DataTables/js/dataTables.responsive.min.js"></script>
+<script src="../DataTables/js/dataTables.buttons.min.js"></script>
+<script src="../DataTables/js/buttons.flash.min.js"></script>
+<script src="../DataTables/js/jszip.min.js"></script>
+<script src="../DataTables/js/pdfmake.min.js"></script>
+<script src="../DataTables/js/vfs_fonts.js"></script>
+<script src="../DataTables/js/buttons.html5.min.js"></script>
+<script src="../DataTables/js/buttons.print.min.js"></script>
 <script src="../bootstrap/js/bootstrap-submenu.js"></script>
 <script src="../bootstrap/js/bootbox.min.js"></script>
 <script src="../js/jquery.numeric.js"></script>
@@ -35,6 +46,9 @@ $(document).ready(function(){
 	//Activar Menú
 	$("#menu3").attr('class','active');
 
+	//Parse Array de Submotivos
+	var obj = jQuery.parseJSON('<?php echo json_encode($submotivos)?>');
+
 	//Función para buscar Comentario de la Gestión
 	$('#lista tbody').on('click', '.link', function(){
 		id = ($(this).attr('id'));
@@ -46,23 +60,33 @@ $(document).ready(function(){
 
 	//Función para buscar los submotivos despues de seleccionar un motivo
 	$("#motivo").change(function () {
-           $("#motivo option:selected").each(function () {
-            elegido=$(this).val();
-            $.post('include/pdo/registro.php', { function:"searchSub", elegido:elegido }, function(data){
-            $("#submotivo").html(data);
-            });
+        $('#submotivo').empty();
+		$('#submotivo').append("<option>Seleccionar...</option>")	
+		$('#motivo option:selected').each(function () {
+			elegido=$(this).val();			
+        	//Buscamos los submotivos
+        	$.each(obj, function(i,item){
+        		if (elegido == obj[i].principal){
+        			$('#submotivo').append("<option>"+ obj[i].secundaria +"</option>")
+        		}				
+			})
         });
-   });
+   	});
 
 	//Función para buscar los submotivos despues de seleccionar un motivo
 	$("#motivo2").change(function () {
-           $("#motivo2 option:selected").each(function () {
-            elegido=$(this).val();
-            $.post("include/buscar_sub.php", { elegido: elegido }, function(data){
-            $("#submotivo2").html(data);
-            });
+        $('#submotivo2').empty();
+		$('#submotivo2').append("<option>Seleccionar...</option>")	
+		$('#motivo2 option:selected').each(function () {
+			elegido=$(this).val();			
+        	//Buscamos los submotivos
+        	$.each(obj, function(i,item){
+        		if (elegido == obj[i].principal){
+        			$('#submotivo2').append("<option>"+ obj[i].secundaria +"</option>")
+        		}				
+			})
         });
-   });
+   	});
 
 	//Función para mostar ventana de edición
 	$('#lista tbody').on('click', '.edit', function(){
@@ -227,7 +251,25 @@ $(document).ready(function(){
 			}
 		},
 		aLengthMenu: [[10,50,100,-1],[10,50,100,'Todo']],
-			"iDisplayLength": 10
+			"iDisplayLength": 10,
+		dom: 'Bfrtip',
+		buttons: [
+			{ 
+				extend: 'copy',
+				title: 'Reporte de Tipificaciones',
+				text: 'Copiar',
+				exportOptions: {
+				  columns: [ 0,1,2,3,4,5,6,7,8]
+				}
+			},
+			{
+				extend: 'excel',
+				title: 'Reporte de Tipificaciones',
+				exportOptions: {
+				  columns: [ 0,1,2,3,4,5,6,7,8]
+				}
+			}
+    	]
 	});
 	
 
@@ -396,15 +438,6 @@ $(document).ready(function(){
 		        <tbody>
         		</tbody>
     		</table>
-		    <?
-			  if ($nivel < 3){
-			?>
-		    <div align="center"><img  name="filtro" id="filtro" src="imagenes/excel.png" alt="Exportar a Excel" class="cursor" data-toggle="tooltip" title="Exportar a Excel"/>
-		   	</div>
-		    <br>
-			<?
-				}
-			?>
     	</div><!-- End col -->
     </div><!-- End row -->      
 
@@ -432,102 +465,9 @@ $(document).ready(function(){
                 </div><!--End panel -->
             </div><!--End panel -->
     	</div><!-- End Dialog -->
-    </div><!-- end Modal -->    
-
-    <!-- Modal Reporte a Excel -->
-    <div id="reporte" class="modal fade" role="dialog" tabindex='-1'>
-    	<div class="modal-dialog">
-        	<div class="panel panel-primary luminoso text-center">
-            	<button type="button" class="close" data-dismiss="modal">&times;</button>
-                <div class="panel-heading">
-                    <h3 class="panel-title">Exportar a Excel</h3>
-                </div>
-
-                <div class="panel-body">
-                    <form name="reporteExcel" id="reporteExcel" action="excel.php" method="POST">
-	                    <div class="form-group col-xs-12 col-md-6">
-	                        <label for="motivo">Motivo de Contacto</label>
-	                        <select name="motivo" id="motivo" class="form-control">
-	                        <option>Seleccionar...</option>
-	                        <?php
-	                            $consulta = mysql_query("SELECT DISTINCT motivo FROM call_registro WHERE estatus != '0' ORDER BY motivo ASC");
-	                                if(mysql_num_rows($consulta)){ // if para almacenar el resultado de la consulta
-	                                    while($lista = mysql_fetch_array($consulta)){
-	                                    echo "<option>".utf8_encode($lista['motivo'])."</option>";
-	                                    }//End While
-	                                }//End If
-	                        ?>            
-
-	                        <option>TODOS</option>
-	                        </select>
-	                    </div>
-
-	                    <div class="form-group col-xs-12 col-md-6">
-	                        <label for="submotivo">Sub-Motivo</label>
-	                          <select name="submotivo" id="submotivo" class="form-control" >
-	                          <option>Seleccionar...</option>
-	                          </select>
-	                    </div>
-
-	                    <div class="form-group col-xs-12 col-md-6">
-	                        <label for="departamento">Departamento</label>
-	                        <select name="departamento" id="departamento" class="form-control" >
-	                            <option>Seleccionar...</option>
-	                            <?php
-	                                $consulta = mysql_query("SELECT DISTINCT departamento FROM call_registro WHERE estatus != '0' ORDER BY departamento ASC");
-	                                    if(mysql_num_rows($consulta)){ // if para almacenar el resultado de la consulta
-	                                        while($lista = mysql_fetch_array($consulta)){
-	                                        echo "<option>".utf8_encode($lista['departamento'])."</option>";
-	                                        }//End While
-	                                    }//End If
-	                            ?>
-	                        <option>TODOS</option>
-	                        </select>
-	                    </div>
-
-	                    <div class="form-group col-xs-12 col-md-6">
-	                        <label for="usuario">Usuario</label>
-	                        <select name="usuario" id="usuario" class="form-control" >
-	                            <?php
-	                                if ($_SESSION['nivel'] >2){
-	                                    echo "<option>Seleccionar...</option>";
-	                                    echo "<option>".$_SESSION['nick']."</option>";
-	                                }else{
-	                                $consulta = mysql_query("SELECT DISTINCT usuario FROM call_registro ORDER BY usuario ASC");
-	                                    if(mysql_num_rows($consulta)){ // if para almacenar el resultado de la consulta
-	                                        echo "<option>Seleccionar...</option>";
-	                                            while($lista = mysql_fetch_array($consulta)){
-	                                        echo "<option>".utf8_encode($lista['usuario'])."</option>";
-	                                        }//End While
-	                                        echo "<option>TODOS</option>";
-	                                    }//End If
-	                                }
-	                            ?>
-	                        </select>
-	                    </div>			
-
-	                    <div class="form-group col-xs-12 col-md-6 text-center">
-	                        <label for="fecha1">Fecha Inicial</label>
-	                        <input type="text" name="fecha1" id="fecha1" class="form-control" readonly style="background-color:#FFF">
-	                    </div>
-
-	                    <div class="form-group col-xs-12 col-md-6 text-center">
-	                        <label for="fecha2">Fecha Final</label>
-	                        <input type="text" name="fecha2" id="fecha2" class="form-control" readonly style="background-color:#FFF">
-	                    </div>
-
-	                    <div class="form-group col-xs-12">
-	                        <input type="image" id="botongonep" src="imagenes/excel.png" title="Exportar para Excel"/>
-	                    </div>
-                	</form>
-                </div>
-            </div><!--End panel -->
-        </div><!-- End Dialog -->
-    </div><!-- end Modal --> 
-        
+    </div><!-- end Modal -->
 
 	<!-- Modal Editar Registro -->
-
     <div id="editar" class="modal fade" role="dialog" tabindex='-1'>
     	<div class="modal-dialog">
         	<div class="panel panel-primary luminoso text-center">
@@ -542,14 +482,13 @@ $(document).ready(function(){
                         <label for="motivo2">Motivo de Contacto</label>
                         <select name="motivo2" id="motivo2" class="form-control">
                         <option>Seleccionar...</option>
-                        <?php
-                            $consulta = mysql_query("SELECT DISTINCT principal FROM call_tipificacion WHERE estatus = '1' ORDER BY principal ASC");
-                                if(mysql_num_rows($consulta)){ // if para almacenar el resultado de la consulta
-                                    while($lista = mysql_fetch_array($consulta)){
-                                    echo "<option>".utf8_encode($lista['principal'])."</option>";
-                                    }//End While
-                                }//End If
-                        ?>
+                        <?php                    
+		                    if (!is_null($motivos)){
+		               			foreach ($motivos as $key => $value){
+		               				echo '<option>'.$value['principal'].'</option>';
+		               			}
+		               		}
+		                ?>
                         </select>
                     </div>
 

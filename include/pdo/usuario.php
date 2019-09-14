@@ -19,10 +19,10 @@ if(isset($_SESSION['user'])){
 		 	$sql = $objdatabase->prepare("INSERT INTO call_usuario(ci, nombre, cargo, userid, departamento, clave, nivel, modulos, estatus) VALUES (:ci, :nombre, :cargo, :userid, :departamento, :clave, :nivel, :modulos, 1)");
 			//Definimos los parametros de la Query
 			$sql->bindParam(':ci', $ci, PDO::PARAM_STR);
-			$sql->bindParam(':nombre', utf8_decode(ucwords(strtolower($_POST['nombre']))), PDO::PARAM_STR);
-			$sql->bindParam(':cargo', utf8_decode(ucwords(strtolower($_POST['cargo']))), PDO::PARAM_STR);
+			$sql->bindParam(':nombre', ucwords(strtolower($_POST['nombre'])), PDO::PARAM_STR);
+			$sql->bindParam(':cargo', ucwords(strtolower($_POST['cargo'])), PDO::PARAM_STR);
 			$sql->bindParam(':userid', $userid, PDO::PARAM_STR);
-			$sql->bindParam(':departamento',utf8_decode(ucwords(strtolower($_POST['departamento']))), PDO::PARAM_STR);
+			$sql->bindParam(':departamento',ucwords(strtolower($_POST['departamento'])), PDO::PARAM_STR);
 			$sql->bindParam(':clave', md5($_POST['clave']), PDO::PARAM_STR);
 			$sql->bindParam(':nivel', $_POST['tipousuario'], PDO::PARAM_STR);
 			$sql->bindParam(':modulos', implode(",", $_POST['modulos']), PDO::PARAM_STR);
@@ -45,12 +45,12 @@ if(isset($_SESSION['user'])){
 		$sql = $objdatabase->prepare("UPDATE call_usuario SET nombre =:nombre, cargo =:cargo, departamento =:departamento, nivel =:nivel, modulos =:modulos WHERE ci =:ci");
 		//Definimos los parametros de la Query
 		$sql->bindParam(':ci', $_POST['cedula'], PDO::PARAM_STR);
-		$nombre = ucwords(strtolower($_POST['nombre']));
-		$cargo = ucwords(strtolower($_POST['cargo']));		
-		$depratamento = ucwords(strtolower($_POST['departamento']));
-		$sql->bindParam(':nombre', utf8_decode($nombre), PDO::PARAM_STR);
-		$sql->bindParam(':cargo', utf8_decode($cargo), PDO::PARAM_STR);
-		$sql->bindParam(':departamento', utf8_decode($depratamento), PDO::PARAM_STR);
+		$nombre = mb_convert_case($_POST['nombre'], MB_CASE_TITLE, "UTF-8");
+		$cargo = mb_convert_case($_POST['cargo'], MB_CASE_TITLE, "UTF-8");
+		$depratamento = mb_convert_case($_POST['departamento'], MB_CASE_TITLE, "UTF-8");
+		$sql->bindParam(':nombre', $nombre, PDO::PARAM_STR);
+		$sql->bindParam(':cargo', $cargo, PDO::PARAM_STR);
+		$sql->bindParam(':departamento', $depratamento, PDO::PARAM_STR);
 		$sql->bindParam(':nivel', $_POST['tipousuario'], PDO::PARAM_STR);
 		$sql->bindParam(':modulos', implode(",", $_POST['modulos']), PDO::PARAM_STR);
 		if ($sql->execute()) {
@@ -95,12 +95,12 @@ if(isset($_SESSION['user'])){
 		if ($count){
 			$data = $sql->fetch(PDO::FETCH_OBJ);
 			$json = array(
-				'nombre' => utf8_encode($data->nombre),
-				'userid' => utf8_encode($data->userid),
-				'cargo' => utf8_encode($data->cargo),			
-				'departamento' => utf8_encode($data->departamento),
-				'nivel' => utf8_encode($data->nivel),
-				'modulos' => utf8_encode($data->modulos),
+				'nombre' => $data->nombre,
+				'userid' => $data->userid,
+				'cargo' => $data->cargo,			
+				'departamento' => $data->departamento,
+				'nivel' => $data->nivel,
+				'modulos' => $data->modulos,
 			);	
 			echo json_encode($json);
 		}//End if
@@ -160,11 +160,11 @@ if(isset($_SESSION['user'])){
 			$data = array();
 			foreach ($result as $key => $value){
 				$ci = $value['ci'];
-				$nombre = utf8_encode($value['nombre']);
-				$userid = utf8_encode($value['userid']);
-				$cargo = utf8_encode($value['cargo']);
-				$departamento =  utf8_encode($value['departamento']);
-				$est = utf8_encode($value['estatus']);
+				$nombre = $value['nombre'];
+				$userid = $value['userid'];
+				$cargo = $value['cargo'];
+				$departamento = $value['departamento'];
+				$est = $value['estatus'];
 				switch ($est){
 					case 0: $estatus = '<img src="imagenes/inactivo.png">';
 							$block='<img src="imagenes/block2.png" class="camb cursor" title="Desbloquear Usuario" id="'.$ci.'│'.$est.'">';
@@ -173,7 +173,7 @@ if(isset($_SESSION['user'])){
 							$block='<img src="imagenes/block.png" class="camb cursor" title="Bloquear Usuario" id="'.$ci.'│'.$est.'">';
 					break;
 				}
-				$niv = utf8_encode($value['nivel']);
+				$niv = $value['nivel'];
 				switch ($niv){
 					case 1: $nivel = "Administrador";
 					break;
