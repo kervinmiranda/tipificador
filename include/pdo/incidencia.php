@@ -65,6 +65,46 @@ if(isset($_SESSION['user'])){
 		}
 	}
 
+	// Get Incident
+	function getIncident(){
+		$guia = $_POST['guia'];
+		$tipo = $_POST['tipo'];
+		$objdatabase = new Database();
+		switch ($tipo) {
+			case "activa":
+				$sql = $objdatabase->prepare("SELECT call_incidencia.id, call_incidencia.estatus, fecha, motivo, sub_motivo, libced, guiatracking, comentario FROM call_incidencia INNER JOIN call_registro ON call_incidencia.id = call_registro.id WHERE guiatracking = :guia AND call_incidencia.estatus <> 'Cerrada'");				
+				break;
+			case "historial":
+				$sql = $objdatabase->prepare("SELECT call_incidencia.id, call_incidencia.estatus, fecha, motivo, sub_motivo, libced, guiatracking, comentario FROM call_incidencia INNER JOIN call_registro ON call_incidencia.id = call_registro.id WHERE guiatracking =:guia AND call_incidencia.estatus = 'Cerrada'");
+				break;			
+			default:				
+				break;
+		}
+		$sql->bindParam(':guia', $guia, PDO::PARAM_STR);
+		$sql->execute(); // se confirma que el query exista	
+		//Verificamos el resultado
+		$count = $sql->rowCount();
+		if ($count){
+			$json = array();
+			$result = $sql->fetchAll();
+			foreach ($result as $key => $value){
+				$json[] = array(
+					'id' => '<a class="link" href="#" id="'.$value['id'].'" data-toggle="modal" data-placement="bottom" data-target="#reporte">'.$value['id'].'</a>',
+					'fecha' => $value['fecha'],
+					'motivo' => $value['motivo'],
+					'sub_motivo' => $value['sub_motivo'],
+					'libced' => $value['libced'],
+					'guiatracking' => $value['guiatracking'],
+					'estatus' => $value['estatus'],
+					'mensaje' => '<img src="imagenes/comentar.png" class="mensaje" id="'.$value['id'].'">',
+					'edit' => '<img src="imagenes/gestion.png" class="edit" id="'.$value['id'].'">');
+			}
+			$json['success'] = true;
+			echo json_encode($json);
+		}
+		$objdatabase = null;
+	}
+
 	if (isset($_POST['function'])){
 		$function  = $_POST['function']; //Obtener la Opción a realizar
 		switch ($function) {
@@ -72,7 +112,9 @@ if(isset($_SESSION['user'])){
 				getIncidents();
 			case "incidentManagement":
 				incidentManagement();
-				break;			
+				break;
+			case "getIncident":
+				getIncident();
 			default:
 				break;
 		}

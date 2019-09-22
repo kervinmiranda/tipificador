@@ -46,6 +46,9 @@ $(document).ready(function(){
 	var fila;
 	var fecha;
 	var date;
+	var nivel = <?php echo $_SESSION['nivel'];?>
+
+	console.log(nivel);
 
 	//Activar Menú
 	$("#menu3").attr('class','active');
@@ -215,6 +218,8 @@ $(document).ready(function(){
 		$('#reporte').modal('toggle');
 	});
 
+
+
 	//Convertir la tabla en Datatable
 	date = new Date();
 	var mes = getTwoDigitDateFormat(date.getMonth()+1);
@@ -223,7 +228,6 @@ $(document).ready(function(){
 	datatable(fecha);
 
 	function datatable(fecha){
-		$('#lista').dataTable().fnDestroy();
 		$('#lista').dataTable({
 			"bDestroy": true,
 			"ajax": {
@@ -235,34 +239,20 @@ $(document).ready(function(){
 				"type": 'POST'
 	  		},
 			"sPaginationType": "full_numbers",
-			"language": {
-				"sProcessing":     "Procesando...",
-				"sLengthMenu":     "Mostrar _MENU_ registros",
-				"sZeroRecords":    "No se encontraron resultados",
-				"sEmptyTable":     "Ningún dato disponible en esta tabla",
-				"sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-				"sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
-				"sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-				"sInfoPostFix":    "",
-				"sSearch":         "Buscar:",
-				"sUrl":            "",
-				"sInfoThousands":  ",",
-				"sLoadingRecords": "Cargando...",
-				"oPaginate": {
-					"sFirst":    "Primero",
-					"sLast":     "Último",
-					"sNext":     "Siguiente",
-					"sPrevious": "Anterior"
-				},
-				"oAria": {
-					"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-					"sSortDescending": ": Activar para ordenar la columna de manera descendente"
-				}
+			"language":{ 
+				"url": "../DataTables/locale/Spanish.json"
 			},
 			aLengthMenu: [[10,50,100,-1],[10,50,100,'Todo']],
 				"iDisplayLength": 10,
-			dom: 'Bfrtip',
-			buttons: [
+			dom: 'Bflrtip',
+			buttons: getbuttons(nivel)
+		});
+	}	
+
+	function getbuttons(niv){
+		var buttons = "";
+		if (niv == 1){
+			var buttons = [
 				{ 
 					extend: 'copy',
 					title: 'Reporte de Tipificaciones',
@@ -276,28 +266,31 @@ $(document).ready(function(){
 					title: 'Reporte de Tipificaciones',
 					exportOptions: {
 					  columns: [ 0,1,2,3,4,5,6,7,8]
-					}
 				}
-	    	]
-		});
-	}
-
-	function getTwoDigitDateFormat(month) {
-	  return (month < 10) ? '0' + month : '' + month;
+			}];			
+		}else{
+			var buttons = [];
+		}
+		return buttons;
 	}
 
 	$('#month').datepicker({
-	  language: "es",
-	  format: "MM yyyy",
-	  minViewMode: 1,
-	  endDate: new Date(),
-	  autoclose: true
+		language: "es",
+	  	format: "MM yyyy",
+	  	minViewMode: 1,
+	  	endDate: new Date(),
+	  	autoclose: true
 	}).on("changeMonth", function(e) {
 		mes = getTwoDigitDateFormat(e.date.getMonth()+1);
 		anio = e.date.getFullYear()
 		fecha = anio + "-" + mes;
-		datatable(fecha)
+		$('#lista').DataTable().clear();
+		datatable(fecha);
 	});
+
+	function getTwoDigitDateFormat(month) {
+	  return (month < 10) ? '0' + month : '' + month;
+	}
 
 });
 </script>
@@ -376,6 +369,32 @@ $(document).ready(function(){
     		</table>
     	</div><!-- End col -->
     </div><!-- End row -->      
+
+    <!-- Modal Observación Registro -->
+    <div id="observacion" class="modal fade" role="dialog" tabindex='-1'>
+    	<div class="modal-dialog modal-lg">
+        	<div class="panel panel-primary luminoso text-center">
+            	<button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div class="panel-heading">
+                    <h3 class="panel-title" id="registro"></h3>
+                </div>       
+
+                <div class="panel-body">
+                	<div class="table-responsive">
+                		<table id="gestion" class="table table-striped table-bordered text-center dt-responsive table-hover nowrap formulario" cellspacing="0" width="100%">
+	                    	<thead>
+	                    	</thead>
+			                <tbody>
+			                    <tr>
+			                        <td><div id="comen"></div></td>
+			                    </tr>
+			                </tbody>
+                		</table>
+                	</div>
+                </div><!--End panel -->
+            </div><!--End panel -->
+    	</div><!-- End Dialog -->
+    </div><!-- end Modal -->
 
 	<!-- Modal Editar Registro -->
     <div id="editar" class="modal fade" role="dialog" tabindex='-1'>

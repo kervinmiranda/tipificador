@@ -295,7 +295,7 @@ $("#boton_buscar_masiva").click(function(){
 
 //Consulta Masiva de Guía o Tracking
 	$("#search").click(function() {
-		$('#lista').dataTable().fnClearTable();
+		$('#lista').DataTable().clear();
 		tipo = 'activa';
 		lines = [];
 			$.each($('#guias').val().split(/\n/), function(i, line){
@@ -307,9 +307,9 @@ $("#boton_buscar_masiva").click(function(){
 		$.each(lines, function(i,l){
 			guia = l;
 			$.ajax({
-				url: "include/buscar_masiva.php",
+				url: "include/pdo/incidencia.php",
 				type: 'post',
-				data: {guia:guia, tipo:tipo},
+				data: {guia:guia, tipo:tipo, function:"getIncident"},
 				dataType: 'json',
 				success: function (data) {
 					if (data.success) {
@@ -399,18 +399,7 @@ $("#boton_buscar_masiva").click(function(){
 			"iDisplayLength": 10
 	});
 
-//Función para colocar los Textos a tipo fecha
-	$('#fecha1').datepicker({
-		dateFormat: 'dd/mm/yy', 
-		maxDate: 0, minDate:'-5Y',
-		onSelect: function(dateText, inst) {
-			var lockDate = new Date($('#fecha1').datepicker('getDate'));
-			//lockDate.setDate(lockDate.getDate() + 1);
-			$('input#fecha2').datepicker('option', 'minDate', lockDate);
-		}
-	});	
 
-	$("#fecha2").datepicker({dateFormat: 'dd/mm/yy', maxDate: 0 });
 });
 
 </script>
