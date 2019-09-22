@@ -93,8 +93,4 @@ function cambiarFormatoFecha2($fecha){
 
 $time= date_default_timezone_set("America/Caracas").date(".d/m/y H:i:s a", time());
 
-
-
-		
-
-		?>
+?>

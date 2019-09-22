@@ -17,6 +17,7 @@ if(isset($_SESSION['user'])){
 <link rel="stylesheet" href="../DataTables/css/responsive.bootstrap.min.css">
 <link rel="stylesheet" href="../DataTables/css/buttons.dataTables.min.css">  
 <link rel="stylesheet" href="../bootstrap/css/bootstrap-submenu.css">
+<link rel="stylesheet" href="../bootstrap/css/bootstrap-datepicker.css">
 <link rel="stylesheet" href="css/call.css">
 
 <!-- Archivos JavaScript -->	
@@ -35,6 +36,8 @@ if(isset($_SESSION['user'])){
 <script src="../DataTables/js/buttons.print.min.js"></script>
 <script src="../bootstrap/js/bootstrap-submenu.js"></script>
 <script src="../bootstrap/js/bootbox.min.js"></script>
+<script src="../bootstrap/js/bootstrap-datepicker.js"></script>
+<script src="../bootstrap/js/locale/bootstrap-datepicker.es.js"></script>
 <script src="../js/jquery.numeric.js"></script>
 <script src="js/libreriajs.js"></script>
 <script type="text/javascript">
@@ -42,6 +45,7 @@ $(document).ready(function(){
 	var id;
 	var fila;
 	var fecha;
+	var date;
 
 	//Activar Menú
 	$("#menu3").attr('class','active');
@@ -211,96 +215,20 @@ $(document).ready(function(){
 		$('#reporte').modal('toggle');
 	});
 
-
 	//Convertir la tabla en Datatable
-	fecha = $('#anio').val() + "-" + $('#mes').val();
+	date = new Date();
+	var mes = getTwoDigitDateFormat(date.getMonth()+1);
+	var anio = date.getFullYear();
+	fecha = anio + "-" + mes;
+	datatable(fecha);
 
-	$('#lista').dataTable({
-		"bDestroy": true,
-		"ajax": {
-    		"url": "include/pdo/registro.php",
-    		"data": { 
-                fecha:fecha,
-                function:"lista"
-                },
-			"type": 'POST'
-  		},
-		"sPaginationType": "full_numbers",
-		"language": {
-			"sProcessing":     "Procesando...",
-			"sLengthMenu":     "Mostrar _MENU_ registros",
-			"sZeroRecords":    "No se encontraron resultados",
-			"sEmptyTable":     "Ningún dato disponible en esta tabla",
-			"sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-			"sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
-			"sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-			"sInfoPostFix":    "",
-			"sSearch":         "Buscar:",
-			"sUrl":            "",
-			"sInfoThousands":  ",",
-			"sLoadingRecords": "Cargando...",
-			"oPaginate": {
-				"sFirst":    "Primero",
-				"sLast":     "Último",
-				"sNext":     "Siguiente",
-				"sPrevious": "Anterior"
-			},
-			"oAria": {
-				"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-				"sSortDescending": ": Activar para ordenar la columna de manera descendente"
-			}
-		},
-		aLengthMenu: [[10,50,100,-1],[10,50,100,'Todo']],
-			"iDisplayLength": 10,
-		dom: 'Bfrtip',
-		buttons: [
-			{ 
-				extend: 'copy',
-				title: 'Reporte de Tipificaciones',
-				text: 'Copiar',
-				exportOptions: {
-				  columns: [ 0,1,2,3,4,5,6,7,8]
-				}
-			},
-			{
-				extend: 'excel',
-				title: 'Reporte de Tipificaciones',
-				exportOptions: {
-				  columns: [ 0,1,2,3,4,5,6,7,8]
-				}
-			}
-    	]
-	});
-	
-
-	//Función para colocar los Textos a tipo fecha
-	$('#fecha1').datepicker({
-		dateFormat: 'dd/mm/yy',
-		maxDate: 0, minDate:'-5Y',
-		onSelect: function(dateText, inst) {
-			var minimo = new Date($('#fecha1').datepicker('getDate'));
-			var maximo = new Date($('#fecha1').datepicker('getDate'));
-			minimo.setDate(minimo.getDate());
-			maximo.setDate(maximo.getDate() + 15);
-			$('input#fecha2').datepicker('option', 'minDate', minimo);
-			$('input#fecha2').datepicker('option', 'maxDate', maximo);
-		}
-	});
-
-	$("#fecha2").datepicker({
-		dateFormat: 'dd/mm/yy'
-	});
-
-	//Escoger otra fecha o Mes
-	$('#anio, #mes').change(function(){
+	function datatable(fecha){
 		$('#lista').dataTable().fnDestroy();
-
-		fecha = $('#anio').val() + "-" + $('#mes').val();	
-
 		$('#lista').dataTable({
+			"bDestroy": true,
 			"ajax": {
 	    		"url": "include/pdo/registro.php",
-	    		"data": {
+	    		"data": { 
 	                fecha:fecha,
 	                function:"lista"
 	                },
@@ -332,9 +260,44 @@ $(document).ready(function(){
 				}
 			},
 			aLengthMenu: [[10,50,100,-1],[10,50,100,'Todo']],
-			"iDisplayLength": 10
+				"iDisplayLength": 10,
+			dom: 'Bfrtip',
+			buttons: [
+				{ 
+					extend: 'copy',
+					title: 'Reporte de Tipificaciones',
+					text: 'Copiar',
+					exportOptions: {
+					  columns: [ 0,1,2,3,4,5,6,7,8]
+					}
+				},
+				{
+					extend: 'excel',
+					title: 'Reporte de Tipificaciones',
+					exportOptions: {
+					  columns: [ 0,1,2,3,4,5,6,7,8]
+					}
+				}
+	    	]
 		});
-	});//End Function
+	}
+
+	function getTwoDigitDateFormat(month) {
+	  return (month < 10) ? '0' + month : '' + month;
+	}
+
+	$('#month').datepicker({
+	  language: "es",
+	  format: "MM yyyy",
+	  minViewMode: 1,
+	  endDate: new Date(),
+	  autoclose: true
+	}).on("changeMonth", function(e) {
+		mes = getTwoDigitDateFormat(e.date.getMonth()+1);
+		anio = e.date.getFullYear()
+		fecha = anio + "-" + mes;
+		datatable(fecha)
+	});
 
 });
 </script>
@@ -360,40 +323,13 @@ $(document).ready(function(){
     </div>
 
     <div class="row">
-	<div class="col-xs-12 col-sm-3 col-md-4"></div>
-    <div class="col-xs-12 col-sm-3 col-md-2" align="center">
-    	<label for="mes">Mes</label>
-    	<select name="mes" id="mes" class="form-control">
-        	<?php
-				$mes_actual = date('n');		
-
-				$meses = array('Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio', 'Agosto','Septiembre','Octubre','Noviembre','Diciembre');
-
-				for ($i = 0; $i < sizeof($meses); $i++){			
-					if ($mes_actual == $i + 1){
-						echo '<option value="'.str_pad(($i + 1), 2, "0", STR_PAD_LEFT).'" selected>'.$meses[$i].'</option>';
-					}else{
-						echo '<option value="'.str_pad(($i + 1), 2, "0", STR_PAD_LEFT).'">'.$meses[$i].'</option>';
-					}//End if
-				}//End For
-			?>
-        </select>
-    </div>
-
-    <div class="col-xs-12 col-sm-3 col-md-2" align="center">
-    	<label for="anio">Año</label>
-    	<select name="anio" id="anio" class="form-control">
-        	<?php
-				$anio_actual = date('Y');
-				for($i = $anio_actual; $i >= 2015; $i--){
-					echo '<option>'.$i.'</option>';
-				}
-			?>
-        </select>
-    </div> 
-
-    <div class="col-xs-12 col-sm-3 col-md-4"></div>	
-	</div><!-- End row -->
+		<div class="form-group text-center">
+    		<div class="col-xs-12  ol-md-4 col-lg-2 col-md-offset-4 col-lg-offset-5">
+	    		<label>Mes y Año</label>
+	    		<input type="text" class="form-control form_datetime text-center" id="month" readonly>
+			</div>
+		</div>
+	</div>
     
     <div class="row">
     	<div class="col-xs-12 table-responsive">
@@ -440,32 +376,6 @@ $(document).ready(function(){
     		</table>
     	</div><!-- End col -->
     </div><!-- End row -->      
-
-    <!-- Modal Reporte a Excel -->
-    <div id="observacion" class="modal fade" role="dialog" tabindex='-1'>
-    	<div class="modal-dialog modal-lg">
-        	<div class="panel panel-primary luminoso text-center">
-            	<button type="button" class="close" data-dismiss="modal">&times;</button>
-                <div class="panel-heading">
-                    <h3 class="panel-title" id="registro"></h3>
-                </div>       
-
-                <div class="panel-body">
-                	<div class="table-responsive">
-                		<table id="gestion" class="table table-striped table-bordered text-center dt-responsive table-hover nowrap formulario" cellspacing="0" width="100%">
-	                    	<thead>
-	                    	</thead>
-			                <tbody>
-			                    <tr>
-			                        <td><div id="comen"></div></td>
-			                    </tr>
-			                </tbody>
-                		</table>
-                	</div>
-                </div><!--End panel -->
-            </div><!--End panel -->
-    	</div><!-- End Dialog -->
-    </div><!-- end Modal -->
 
 	<!-- Modal Editar Registro -->
     <div id="editar" class="modal fade" role="dialog" tabindex='-1'>
