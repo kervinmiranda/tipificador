@@ -111,7 +111,8 @@ if(isset($_SESSION['user'])){
 				$socialuser = preg_replace('/\s+/', '', $socialuser);					
 			break;				
 			default:
-				$socialuser = '';					
+				$socialuser = '';
+			break;				
 		}
 		$sql = $objdatabase->prepare("INSERT INTO call_registro (pais, fecha, usuario, departamento, motivo, sub_motivo, libced, usersocial, guiatracking, comentario, estatus) VALUES (:pais, :fecha, :userid, :departamento, :motivo, :submotivo, :codigo, :socialuser, :guia, :comentario, 1)");
 		$sql->bindParam(':pais', $pais, PDO::PARAM_STR);
@@ -169,12 +170,13 @@ if(isset($_SESSION['user'])){
 		$objdatabase = new Database();
 		$fechabuscar = $_POST['fecha'];
 		if ($_SESSION['nivel'] < 3){
-			$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE fecha LIKE ?");			
+			$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE fecha LIKE ?");
+			$sql->bindValue(1,"%{$fechabuscar}%", PDO::PARAM_STR);
 		}else{	
-			$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE usuario = '$userid' AND fecha LIKE ?");
-			$sql->bindParam(':userid', $_SESSION['nick'], PDO::PARAM_STR);
-		}
-		$sql->bindValue(1,"%{$fechabuscar}%", PDO::PARAM_STR);
+			$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE fecha LIKE ? AND usuario = ?");
+			$sql->bindValue(1,"%{$fechabuscar}%", PDO::PARAM_STR);
+			$sql->bindValue(2, $_SESSION['nick'], PDO::PARAM_STR);
+		}			
 		$sql->execute(); // se confirma que el query exista
 		//Verificamos el resultado
 		$count = $sql->rowCount();
@@ -232,7 +234,24 @@ if(isset($_SESSION['user'])){
 		$objdatabase = null;
 		echo $data;
 	}
-	
+
+	//Edit
+	function edit(){
+		$comentario = utf8_decode(trim($_POST['comentario']));
+		$objdatabase = new Database();
+		$sql = $objdatabase->prepare("UPDATE call_registro SET motivo =:motivo, sub_motivo =:submotivo, libced =:cedlib WHERE id = '$id'");
+		$sql->bindParam(':id', $_POST['id'], PDO::PARAM_STR);
+		$sql->bindParam(':motivo', $_POST['motivo'], PDO::PARAM_STR);
+		$sql->bindParam(':submotivo', $_POST['submotivo'], PDO::PARAM_STR);
+		$sql->bindParam(':cedlib', $_POST['cedlib'], PDO::PARAM_STR);
+		if ($sql->execute()) {
+		   $data = "1";
+		} else {
+		   $data = "0";
+		}
+		$objdatabase = null;
+		echo $data;
+	}
 
 	$function  = $_POST['function']; //Obtener la Opción a realizar (Nuevo, editar, bloquear)
 	switch ($function) {
@@ -256,6 +275,8 @@ if(isset($_SESSION['user'])){
 		case "searchId":
 			searchId();
 			break;
+		case "edit":
+			edit();
 		default:
 			break;
 	}	

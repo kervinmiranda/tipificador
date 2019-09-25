@@ -48,8 +48,6 @@ $(document).ready(function(){
 	var date;
 	var nivel = <?php echo $_SESSION['nivel'];?>
 
-	console.log(nivel);
-
 	//Activar Menú
 	$("#menu3").attr('class','active');
 
@@ -142,12 +140,11 @@ $(document).ready(function(){
 
 		bootbox.confirm('¿Seguro que Desea Editar el Registro?', function(result){
 			if (result == true){
-				accion = "editar";
 				motivo = $("#motivo2").val();
 				submotivo = $("#submotivo2").val();
 				cedlib = $('#cedlib2').val();
 				comentario = $("#comentario").val();
-				$.post("include/guardar_registro.php", {accion:accion, id:id, motivo:motivo,submotivo:submotivo, cedlib: cedlib, comentario:comentario}, function(data){
+				$.post("include/guardar_registro.php", {function:"edit", id:id, motivo:motivo,submotivo:submotivo, cedlib: cedlib, comentario:comentario}, function(data){
 					if (data == 0){
 						$('#error').html('<strong>¡Error!</strong> Error al Editar el Registro, Intente más Tarde').fadeIn(1000).fadeOut(10000);
 					}else{
@@ -218,13 +215,13 @@ $(document).ready(function(){
 		$('#reporte').modal('toggle');
 	});
 
-
-
-	//Convertir la tabla en Datatable
+	//Calculate Date
 	date = new Date();
 	var mes = getTwoDigitDateFormat(date.getMonth()+1);
 	var anio = date.getFullYear();
 	fecha = anio + "-" + mes;
+
+	//Convertir la tabla en Datatable
 	datatable(fecha);
 
 	function datatable(fecha){
@@ -249,9 +246,10 @@ $(document).ready(function(){
 		});
 	}	
 
+	// Function Show and hide buttons report
 	function getbuttons(niv){
 		var buttons = "";
-		if (niv == 1){
+		if (niv < 3){
 			var buttons = [
 				{ 
 					extend: 'copy',
@@ -274,6 +272,7 @@ $(document).ready(function(){
 		return buttons;
 	}
 
+	//Datapicker Button
 	$('#month').datepicker({
 		language: "es",
 	  	format: "MM yyyy",
@@ -288,6 +287,7 @@ $(document).ready(function(){
 		datatable(fecha);
 	});
 
+	//Get two digits for month
 	function getTwoDigitDateFormat(month) {
 	  return (month < 10) ? '0' + month : '' + month;
 	}

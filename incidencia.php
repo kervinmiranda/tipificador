@@ -7,9 +7,7 @@ include_once 'include/variables.php';
 if(isset($_SESSION['user'])){
 ?>
 <?php echo $doctype?>
-<!-- Arquivos utilizados pelo jQuery lightBox plugin -->
-<!-- include CSS & JS files -->
-<!-- CSS file -->
+<!-- CSS files -->
 <link rel="stylesheet" href="../bootstrap/css/bootstrap.css">
 <link rel="stylesheet" href="../DataTables/css/dataTables.bootstrap.css">
 <link rel="stylesheet" href="../DataTables/css/responsive.bootstrap.min.css">
