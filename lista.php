@@ -57,7 +57,7 @@ $(document).ready(function(){
 	//Función para buscar Comentario de la Gestión
 	$('#lista tbody').on('click', '.link', function(){
 		id = ($(this).attr('id'));
-			$.post('include/pdo/registro.php', {id:id, function:"searchId"}, function(data){
+			$.post('include/pdo/registro.php', {id:id, function:"searchComment"}, function(data){
 			$('#registro').html('Registro: ' + id);
 			$('#comen').html(data);
 		});//End post
@@ -97,13 +97,23 @@ $(document).ready(function(){
 	$('#lista tbody').on('click', '.edit', function(){
 		id = ($(this).attr('id'));
 		$('#incidencia').html('Incidencia: ' + id);
-		fila = $(this).parents().get(1);
-		$('#motivo2').val($("td:eq(4)", fila).text());
-		$("#submotivo2").append('<option>' + $("td:eq(5)", fila).text()+ '</option>');
-		$('#submotivo2').val($("td:eq(5)", fila).text());
-		$('#cedlib2').val($("td:eq(6)", fila).text());
-		$('#motivo2, #submotivo2, #cedlib2, #comentario').parent().removeClass('has-error has-success');
-		$('#comentario').val('');
+		$.post("include/pdo/registro.php", {function:"searchById", id:id}, function(data){
+			if (data != 0){
+				$('#motivo2').val(data.motivo);
+				$('#submotivo2').empty();
+				$('#submotivo2').append("<option>Seleccionar...</option>")	
+				//Buscamos los submotivos
+	        	$.each(obj, function(i,item){
+	        		if (data.motivo == obj[i].principal){
+	        			$('#submotivo2').append("<option>"+ obj[i].secundaria +"</option>")
+	        		}				
+				});
+				$('#submotivo2').val(data.sub_motivo);
+				$('#cedlib2').val(data.libced);
+				$('#motivo2, #submotivo2, #cedlib2, #comentario').parent().removeClass('has-error has-success');
+				$('#comentario').val('');
+			}//End if
+		}, "json");//End post		
 	});	
 
 	//Guardar Edición
@@ -144,12 +154,13 @@ $(document).ready(function(){
 				submotivo = $("#submotivo2").val();
 				cedlib = $('#cedlib2').val();
 				comentario = $("#comentario").val();
-				$.post("include/guardar_registro.php", {function:"edit", id:id, motivo:motivo,submotivo:submotivo, cedlib: cedlib, comentario:comentario}, function(data){
+				$.post("include/pdo/registro.php", {function:"editRegister", id:id, motivo:motivo,submotivo:submotivo, cedlib: cedlib, comentario:comentario}, function(data){
 					if (data == 0){
 						$('#error').html('<strong>¡Error!</strong> Error al Editar el Registro, Intente más Tarde').fadeIn(1000).fadeOut(10000);
-					}else{
-						$('#anio').change();
+					}else{						
 						$('#mensaje').html('<strong>¡Exito!</strong> Tipificación '+ id + ' Editada Correctamente').fadeIn(1000).fadeOut(10000);
+						$('#lista').DataTable().clear();
+						datatable(fecha);
 					}//End if
 				});//End post
 				$('#editar').modal('toggle');
@@ -242,36 +253,10 @@ $(document).ready(function(){
 			aLengthMenu: [[10,50,100,-1],[10,50,100,'Todo']],
 				"iDisplayLength": 10,
 			dom: 'Bflrtip',
-			buttons: getbuttons(nivel)
+			buttons: getbuttonsList(nivel)
 		});
 	}	
-
-	// Function Show and hide buttons report
-	function getbuttons(niv){
-		var buttons = "";
-		if (niv < 3){
-			var buttons = [
-				{ 
-					extend: 'copy',
-					title: 'Reporte de Tipificaciones',
-					text: 'Copiar',
-					exportOptions: {
-					  columns: [ 0,1,2,3,4,5,6,7,8]
-					}
-				},
-				{
-					extend: 'excel',
-					title: 'Reporte de Tipificaciones',
-					exportOptions: {
-					  columns: [ 0,1,2,3,4,5,6,7,8]
-				}
-			}];			
-		}else{
-			var buttons = [];
-		}
-		return buttons;
-	}
-
+	
 	//Datapicker Button
 	$('#month').datepicker({
 		language: "es",

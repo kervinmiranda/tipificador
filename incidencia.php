@@ -11,6 +11,7 @@ if(isset($_SESSION['user'])){
 <link rel="stylesheet" href="../bootstrap/css/bootstrap.css">
 <link rel="stylesheet" href="../DataTables/css/dataTables.bootstrap.css">
 <link rel="stylesheet" href="../DataTables/css/responsive.bootstrap.min.css">
+<link rel="stylesheet" href="../DataTables/css/buttons.dataTables.min.css"> 
 <link rel="stylesheet" href="../DataTables/css/select.dataTables.min.css">
 <link rel="stylesheet" href="../bootstrap/css/bootstrap-submenu.css">
 <link rel="stylesheet" href="css/call.css">
@@ -22,6 +23,13 @@ if(isset($_SESSION['user'])){
 <script src="../DataTables/js/dataTables.bootstrap.js"></script>
 <script src="../DataTables/js/dataTables.select.js"></script>
 <script src="../DataTables/js/dataTables.responsive.min.js"></script>
+<script src="../DataTables/js/dataTables.buttons.min.js"></script>
+<script src="../DataTables/js/buttons.flash.min.js"></script>
+<script src="../DataTables/js/jszip.min.js"></script>
+<script src="../DataTables/js/pdfmake.min.js"></script>
+<script src="../DataTables/js/vfs_fonts.js"></script>
+<script src="../DataTables/js/buttons.html5.min.js"></script>
+<script src="../DataTables/js/buttons.print.min.js"></script>
 <script src="../bootstrap/js/bootstrap-submenu.js"></script>
 <script src="../bootstrap/js/bootbox.min.js"></script>
 <script src="../js/jquery.numeric.js"></script>
@@ -30,6 +38,7 @@ if(isset($_SESSION['user'])){
 $(document).ready(function(){
 var id;
 var fila;
+var nivel = <?php echo $_SESSION['nivel'];?>
 
 //Activar Menú
 	$("#menu4").attr('class','active');
@@ -293,7 +302,7 @@ $("#boton_buscar_masiva").click(function(){
 
 //Consulta Masiva de Guía o Tracking
 	$("#search").click(function() {
-		$('#lista').DataTable().clear();
+		$('#lista').DataTable().clear().draw();
 		tipo = 'activa';
 		lines = [];
 			$.each($('#guias').val().split(/\n/), function(i, line){
@@ -316,6 +325,7 @@ $("#boton_buscar_masiva").click(function(){
 								var
 								id = record.id;
 								fecha = record.fecha;
+								departamento = record.departamento;
 								motivo = record.motivo;
 								sub_motivo = record.sub_motivo;
 								libced = record.libced;
@@ -326,6 +336,7 @@ $("#boton_buscar_masiva").click(function(){
 								$('#lista').DataTable().row.add( [
 									id,
 									fecha,
+									departamento,
 									motivo,
 									sub_motivo,
 									libced,
@@ -338,13 +349,7 @@ $("#boton_buscar_masiva").click(function(){
 						})//End each
 
 					}//End if data.success
-				},//End Function data
-				error: function() {
-					var row = $("<tr />");
-						var td = $("<td />").attr('colspan',4).attr('style','text-align:center').append('No hay resultados en la busqueda');
-						td.appendTo(row)
-					row.appendTo('#lista');
-				},
+				}//End Function data				
 			});//End Ajax
 			});
 		$('#mensaje').html('<strong>¡Exito!</strong> Consulta Procesada').fadeIn(1000).fadeOut(5000);
@@ -353,6 +358,7 @@ $("#boton_buscar_masiva").click(function(){
 
 	//Convertir la tabla en datatable
 	$('#lista').DataTable( {
+		"bDestroy": true,
         select: true,
 		"ajax": {
 	    		"url": "include/pdo/incidencia.php",
@@ -362,39 +368,13 @@ $("#boton_buscar_masiva").click(function(){
 				"type": 'POST'
 	  	},
 		"sPaginationType": "full_numbers",
-		"language": {
-			"sProcessing":     "Procesando...",
-			"sLengthMenu":     "Mostrar _MENU_ registros",
-			"sZeroRecords":    "No se encontraron resultados",
-			"sEmptyTable":     "Ningún dato disponible en esta tabla",
-			"sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-			"sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
-			"sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-			"sInfoPostFix":    "",
-			"sSearch":         "Buscar:",
-			"sUrl":            "",
-			"sInfoThousands":  ",",
-			"sLoadingRecords": "Cargando...",
-			"oPaginate": {
-				"sFirst":    "Primero",
-				"sLast":     "Último",
-				"sNext":     "Siguiente",
-				"sPrevious": "Anterior"
+		"language":{ 
+				"url": "../DataTables/locale/Spanish.json"
 			},
-			"select": {
-                "rows": {
-                    "_": "Ha seleccionado %d filas",
-                    "0": "Clic sobre una fila para Seleccionarla",
-                    "1": "Ha seleccionado %d fila"
-                }
-            },
-			"oAria": {
-				"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-				"sSortDescending": ": Activar para ordenar la columna de manera descendente"
-			}
-		},
 		aLengthMenu: [[10,50,100],[10,50,100]],
-			"iDisplayLength": 10
+			"iDisplayLength": 10,
+		dom: 'Bflrtip',
+		buttons: getbuttonsIncidents(nivel)
 	});
 
 

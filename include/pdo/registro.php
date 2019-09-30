@@ -116,7 +116,7 @@ if(isset($_SESSION['user'])){
 		}
 		$sql = $objdatabase->prepare("INSERT INTO call_registro (pais, fecha, usuario, departamento, motivo, sub_motivo, libced, usersocial, guiatracking, comentario, estatus) VALUES (:pais, :fecha, :userid, :departamento, :motivo, :submotivo, :codigo, :socialuser, :guia, :comentario, 1)");
 		$sql->bindParam(':pais', $pais, PDO::PARAM_STR);
-		$sql->bindParam(':fecha', date('Y/m/d'), PDO::PARAM_STR);
+		$sql->bindParam(':fecha', date('Y-m-d H:i:s'), PDO::PARAM_STR);
 		$sql->bindParam(':userid', $_SESSION['nick'], PDO::PARAM_STR);
 		$sql->bindParam(':departamento', $_SESSION['departamento'], PDO::PARAM_STR);
 		$sql->bindParam(':motivo', $motivo, PDO::PARAM_STR);
@@ -218,7 +218,7 @@ if(isset($_SESSION['user'])){
 	}
 
 	//Search Register by Id
-	function searchId(){
+	function searchComment(){
 		$id = 
 		$objdatabase = new Database();
 		$sql = $objdatabase->prepare("SELECT comentario FROM call_registro WHERE id =:id");
@@ -235,26 +235,74 @@ if(isset($_SESSION['user'])){
 		echo $data;
 	}
 
-	//Edit
-	function edit(){
+	//Edit Register
+	function editRegister(){
+		$data = "0";
+		$update = updateRegister();		
+		if ($update != "0"){
+			$data = insertGestion();
+		}
+		echo $data;
+	}
+
+	//Insert Gestion
+	function insertGestion(){
+		$objdatabase = new Database();
+		$sql = $objdatabase->prepare("INSERT INTO call_gestion (id, fecha, gestor, comentario) VALUES (:id, :fecha, :userid, :comentario)");
+		$sql->bindParam(':id', $_POST['id'], PDO::PARAM_STR);
+		$sql->bindParam(':fecha', date('Y-m-d H:i:s'), PDO::PARAM_STR);
+		$sql->bindParam(':userid', $_SESSION['nick'], PDO::PARAM_STR);
+		$sql->bindParam(':comentario', trim($_POST['comentario']), PDO::PARAM_STR);
+		$sql->execute(); // se confirma que el query exista		
+		$count = $sql->rowCount();//Verificamos el resultado
+		if ($count){
+		   $data = $objdatabase->lastInsertId();
+		}else{
+			$data = "0";
+		}		
+		$objdatabase = null;
+		return $data;
+	}
+
+	//Edit Register
+	function updateRegister(){
 		$comentario = utf8_decode(trim($_POST['comentario']));
 		$objdatabase = new Database();
-		$sql = $objdatabase->prepare("UPDATE call_registro SET motivo =:motivo, sub_motivo =:submotivo, libced =:cedlib WHERE id = '$id'");
+		$sql = $objdatabase->prepare("UPDATE call_registro SET motivo =:motivo, sub_motivo =:submotivo, libced =:cedlib WHERE id =:id");
 		$sql->bindParam(':id', $_POST['id'], PDO::PARAM_STR);
 		$sql->bindParam(':motivo', $_POST['motivo'], PDO::PARAM_STR);
 		$sql->bindParam(':submotivo', $_POST['submotivo'], PDO::PARAM_STR);
 		$sql->bindParam(':cedlib', $_POST['cedlib'], PDO::PARAM_STR);
-		if ($sql->execute()) {
+		$sql->execute(); // se confirma que el query exista
+		//Verificamos el resultado
+		$count = $sql->rowCount();
+		if ($count){
 		   $data = "1";
 		} else {
 		   $data = "0";
 		}
 		$objdatabase = null;
-		echo $data;
+		return $data;
+	}
+
+	// Search By Id
+	function searchById(){
+		$objdatabase = new Database();
+		$sql = $objdatabase->prepare("SELECT * FROM call_registro WHERE id =:id");
+		$sql->bindParam(':id', $_POST['id'], PDO::PARAM_STR);
+		$sql->execute(); // se confirma que el query exista		
+		$count = $sql->rowCount();//Verificamos el resultado
+		if ($count){
+			$result = $sql->fetch(PDO::FETCH_OBJ);
+		}else{
+			$result = "0";
+		}
+		$objdatabase = null;
+		echo json_encode($result);
 	}
 
 	$function  = $_POST['function']; //Obtener la Opción a realizar (Nuevo, editar, bloquear)
-	switch ($function) {
+	switch ($function) {		
 		case "searchLib":
 			searchLib();
 			break;
@@ -272,11 +320,14 @@ if(isset($_SESSION['user'])){
 		case "lista":
 			lista();
 			break;
-		case "searchId":
-			searchId();
+		case "searchComment":
+			searchComment();
 			break;
-		case "edit":
-			edit();
+		case "editRegister":
+			editRegister();
+		case "searchById":
+			searchById();
+			break;
 		default:
 			break;
 	}	

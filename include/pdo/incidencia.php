@@ -72,10 +72,10 @@ if(isset($_SESSION['user'])){
 		$objdatabase = new Database();
 		switch ($tipo) {
 			case "activa":
-				$sql = $objdatabase->prepare("SELECT call_incidencia.id, call_incidencia.estatus, fecha, motivo, sub_motivo, libced, guiatracking, comentario FROM call_incidencia INNER JOIN call_registro ON call_incidencia.id = call_registro.id WHERE guiatracking = :guia AND call_incidencia.estatus <> 'Cerrada'");				
+				$sql = $objdatabase->prepare("SELECT call_incidencia.id, call_incidencia.estatus, fecha, motivo, sub_motivo, libced, guiatracking, comentario, departamento FROM call_incidencia INNER JOIN call_registro ON call_incidencia.id = call_registro.id WHERE guiatracking = :guia AND call_incidencia.estatus <> 'Cerrada'");				
 				break;
 			case "historial":
-				$sql = $objdatabase->prepare("SELECT call_incidencia.id, call_incidencia.estatus, fecha, motivo, sub_motivo, libced, guiatracking, comentario FROM call_incidencia INNER JOIN call_registro ON call_incidencia.id = call_registro.id WHERE guiatracking =:guia AND call_incidencia.estatus = 'Cerrada'");
+				$sql = $objdatabase->prepare("SELECT call_incidencia.id, call_incidencia.estatus, fecha, motivo, sub_motivo, libced, guiatracking, comentario, departamento FROM call_incidencia INNER JOIN call_registro ON call_incidencia.id = call_registro.id WHERE guiatracking =:guia AND call_incidencia.estatus = 'Cerrada'");
 				break;			
 			default:				
 				break;
@@ -90,14 +90,16 @@ if(isset($_SESSION['user'])){
 			foreach ($result as $key => $value){
 				$json[] = array(
 					'id' => '<a class="link" href="#" id="'.$value['id'].'" data-toggle="modal" data-placement="bottom" data-target="#reporte">'.$value['id'].'</a>',
+					'departamento' => $value['departamento'],
 					'fecha' => $value['fecha'],
 					'motivo' => $value['motivo'],
 					'sub_motivo' => $value['sub_motivo'],
 					'libced' => $value['libced'],
 					'guiatracking' => $value['guiatracking'],
 					'estatus' => $value['estatus'],
-					'mensaje' => '<img src="imagenes/comentar.png" class="mensaje" id="'.$value['id'].'">',
-					'edit' => '<img src="imagenes/gestion.png" class="edit" id="'.$value['id'].'">');
+					'mensaje' => '<img src="imagenes/comentar.png" class="mensaje cursor" id="'.$value['id'].'" data-toggle="modal" data-placement="bottom" data-target="#comentar" title="Comentar">',
+					'edit' => '<img src="imagenes/edit.png" class="edit cursor" id="'.$value['id'].'" data-toggle="modal" data-placement="bottom" data-target="#editar" title="Editar">'
+			);
 			}
 			$json['success'] = true;
 			echo json_encode($json);
@@ -110,6 +112,7 @@ if(isset($_SESSION['user'])){
 		switch ($function) {
 			case "getIncidents":
 				getIncidents();
+				break;
 			case "incidentManagement":
 				incidentManagement();
 				break;
