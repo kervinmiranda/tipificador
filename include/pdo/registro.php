@@ -93,7 +93,7 @@ if(isset($_SESSION['user'])){
 		$objdatabase = null;
 	}
 
-	//New Register
+	//Insert Register
 	function insertRegister(){
 		$objdatabase = new Database();
 		$pais = $_POST['pais'];

@@ -107,12 +107,11 @@ var nivel = <?php echo $_SESSION['nivel'];?>
 		}else{
 			$('#comentario').parent().removeClass('has-error').addClass('has-success');
 		}
-		bootbox.confirm('¿Seguro que desea Incluir el Usuario?', function(result){
+		bootbox.confirm('¿Seguro que desea Editar la Incidencia?', function(result){
 			if (result == true){
-				accion = 'gestion';
 				estatus = $('#estatus').val();
 				comentario = $('#comentario').val();
-				$.post('include/guardar_registro.php', {id:id,accion:accion,estatus:estatus,comentario:comentario}, function(data){
+				$.post('include/pdo/incidencia.php', {id:id, function:"gestion",estatus:estatus,comentario:comentario}, function(data){
 					if (data  == 0){
 					$('#error').html('<strong>¡Error!</strong> Error al Editar la Incidencia, Intente Nuevamente').fadeIn(1000).fadeOut(5000);
 					}else{
@@ -145,9 +144,8 @@ var nivel = <?php echo $_SESSION['nivel'];?>
 
 		bootbox.confirm('¿Seguro que desea guardar el comentario?', function(result){
 			if (result == true){
-				accion = "comentario";
 				comentario = $("#comentario2").val();
-				$.post("include/guardar_registro.php", {id:id,accion:accion,comentario:comentario}, function(data){
+				$.post("include/pdo/incidencia.php", {id:id, function:"insertcomment", comentario:comentario}, function(data){
 					if (data  == 0){
 						$('#error').html('<strong>¡Error!</strong> Error al Editar la Incidencia, Intente Nuevamente').fadeIn(1000).fadeOut(5000);
 					}else{

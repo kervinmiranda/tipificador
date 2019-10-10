@@ -107,6 +107,49 @@ if(isset($_SESSION['user'])){
 		$objdatabase = null;
 	}
 
+	// Search Incident
+	function searchIncident($id){
+		$objdatabase = new Database();
+		$sql = $objdatabase->prepare("SELECT estatus FROM call_incidencia WHERE id =:id");
+		$sql->bindParam(':id', $id, PDO::PARAM_STR);
+		$sql->execute(); // se confirma que el query exista		
+		//Verificamos el resultado
+		$count = $sql->rowCount();
+		if ($count){
+			$data = $sql->fetchColumn();
+		}else{
+			$data = '0';
+		}
+		$objdatabase = null;
+		return $data;
+	}
+
+	// Insert Comment
+	function insertcomment(){
+		$objdatabase = new Database();
+		$estatus = searchIncident($_POST['id']);
+		if ($estatus != '0'){
+			$objdatabase = new Database();
+			$sql = $objdatabase->prepare("INSERT INTO call_gestion (id, fecha, gestor, comentario, estatus) VALUES (:id, :fecha, :userid, :comentario, :estatus)");
+			$sql->bindParam(':id', $_POST['id'], PDO::PARAM_STR);
+			$sql->bindParam(':fecha', date('Y-m-d H:i:s'), PDO::PARAM_STR);
+			$sql->bindParam(':userid', $_SESSION['nick'], PDO::PARAM_STR);
+			$sql->bindParam(':comentario', trim($_POST['comentario']), PDO::PARAM_STR);
+			$sql->bindParam(':estatus', $estatus, PDO::PARAM_STR);
+			$sql->execute(); // se confirma que el query exista		
+			$count = $sql->rowCount();//Verificamos el resultado
+			if ($count){
+			   	$data = "1";
+			}else{
+				$data = "0";
+			}		
+			$objdatabase = null;
+		}else{
+			$data = "0";
+		}
+		return $data;
+	}
+
 	if (isset($_POST['function'])){
 		$function  = $_POST['function']; //Obtener la Opción a realizar
 		switch ($function) {
@@ -118,6 +161,9 @@ if(isset($_SESSION['user'])){
 				break;
 			case "getIncident":
 				getIncident();
+			case "insertcomment":
+				echo insertcomment();
+				break;
 			default:
 				break;
 		}

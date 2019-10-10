@@ -40,15 +40,19 @@
 			var buttons = [
 				{ 
 					extend: 'copy',
-					title: 'Reporte de Tipificaciones',
+					title: 'Reporte de Incidencias',
 					text: 'Copiar',
 					exportOptions: {
 					  columns: [ 0,1,2,3,4,5,6,7]
 					}
 				},
 				{
-					extend: 'excel',
-					title: 'Reporte de Tipificaciones',
+					extend: 'excelHtml5',
+					customize: function( xlsx ) {
+					    var sheet = xlsx.xl.worksheets['sheet1.xml'];					 
+					    $('row c[r^="G"]', sheet).attr( 't', 's' );
+					},
+					title: 'Reporte de Incidencias',
 					exportOptions: {
 					  columns: [ 0,1,2,3,4,5,6,7]
 				}
