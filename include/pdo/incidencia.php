@@ -150,6 +150,12 @@ if(isset($_SESSION['user'])){
 		return $data;
 	}
 
+
+	//Edit Incident
+	function editIncident(){
+		
+	}
+
 	if (isset($_POST['function'])){
 		$function  = $_POST['function']; //Obtener la Opción a realizar
 		switch ($function) {
@@ -161,8 +167,12 @@ if(isset($_SESSION['user'])){
 				break;
 			case "getIncident":
 				getIncident();
+				break;
 			case "insertcomment":
 				echo insertcomment();
+				break;
+			case "editIncident":
+				editIncident();
 				break;
 			default:
 				break;

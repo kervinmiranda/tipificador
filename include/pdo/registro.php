@@ -240,19 +240,19 @@ if(isset($_SESSION['user'])){
 		$data = "0";
 		$update = updateRegister();		
 		if ($update != "0"){
-			$data = insertGestion();
+			$data = insertGestion($_POST['id'], $_POST['comentario']);
 		}
 		echo $data;
 	}
 
 	//Insert Gestion
-	function insertGestion(){
+	function insertGestion($id, $comment){
 		$objdatabase = new Database();
 		$sql = $objdatabase->prepare("INSERT INTO call_gestion (id, fecha, gestor, comentario) VALUES (:id, :fecha, :userid, :comentario)");
-		$sql->bindParam(':id', $_POST['id'], PDO::PARAM_STR);
+		$sql->bindParam(':id', $id, PDO::PARAM_STR);
 		$sql->bindParam(':fecha', date('Y-m-d H:i:s'), PDO::PARAM_STR);
 		$sql->bindParam(':userid', $_SESSION['nick'], PDO::PARAM_STR);
-		$sql->bindParam(':comentario', trim($_POST['comentario']), PDO::PARAM_STR);
+		$sql->bindParam(':comentario', trim($comment), PDO::PARAM_STR);
 		$sql->execute(); // se confirma que el query exista		
 		$count = $sql->rowCount();//Verificamos el resultado
 		if ($count){
@@ -301,6 +301,25 @@ if(isset($_SESSION['user'])){
 		echo json_encode($result);
 	}
 
+	// Massive Comment
+	function massiveComment(){
+		$selected = $_POST['selected'];
+		$comentario = utf8_decode(trim($_POST['comentario']));					
+		$errors = "";
+		foreach ($selected as &$id) {
+			$insert =  insertGestion($id, $comentario);
+			if ($insert != '0'){
+				$errors .= $id.", "; 
+			}
+		}
+		if($errors != "") {
+			$data = $errors;
+		}else{
+			$data = "1";
+		}
+		return $data;		
+	}
+
 	$function  = $_POST['function']; //Obtener la Opción a realizar (Nuevo, editar, bloquear)
 	switch ($function) {		
 		case "searchLib":
@@ -327,6 +346,9 @@ if(isset($_SESSION['user'])){
 			editRegister();
 		case "searchById":
 			searchById();
+			break;
+		case "massiveComment":
+			echo massiveComment();
 			break;
 		default:
 			break;

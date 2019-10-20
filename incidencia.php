@@ -111,7 +111,7 @@ var nivel = <?php echo $_SESSION['nivel'];?>
 			if (result == true){
 				estatus = $('#estatus').val();
 				comentario = $('#comentario').val();
-				$.post('include/pdo/incidencia.php', {id:id, function:"gestion",estatus:estatus,comentario:comentario}, function(data){
+				$.post('include/pdo/incidencia.php', {id:id, function:"editIncident", estatus:estatus, comentario:comentario}, function(data){
 					if (data  == 0){
 					$('#error').html('<strong>¡Error!</strong> Error al Editar la Incidencia, Intente Nuevamente').fadeIn(1000).fadeOut(5000);
 					}else{
@@ -186,23 +186,21 @@ var nivel = <?php echo $_SESSION['nivel'];?>
 			$('#comentario3').parent().removeClass('has-error').addClass('has-success');
 		}
 		bootbox.confirm('¿Seguro que Desea Agregar el Comentario Masivo?', function(result){
-			if (result == true){
-				accion = "comentario_masivo";
+			if (result == true){				
 				comentario = $("#comentario3").val();
 				$("#lista tbody tr").filter(".selected").each(function (index) {
 					idx = table.row( this ).index();
 					idxid =  table.cell(idx,0).data();
 					var id = $(idxid).text();
-					selected.push( id );
+					selected.push(id);
 				});//End Each
-				$.post("include/guardar_registro.php", {selected:selected,accion:accion,comentario:comentario}, function(data){
-					if (data  == 0){
-						$('#error').html('<strong>¡Error!</strong> Error al incluir los datos, Intente Nuevamente').fadeIn(1000).fadeOut(5000);
+				$.post("include/pdo/registro.php", {selected:selected,function:"massiveComment",comentario:comentario}, function(data){
+					if (data  != 1){
+						$('#error').html('<strong>¡Error!</strong> Error al incluir los datos, los registros '+ data  + 'no pudieron ser comentados, Intente Nuevamente').fadeIn(1000).fadeOut(5000);
 					}
 					if (data == 1){
 						$('#mensaje').html('<strong>¡Exito!</strong> Comentario Masivo Inlcuido Correctamente').fadeIn(1000).fadeOut(5000);
-					}
-					//End if
+					}//End if
 				});//End post
 					$("#comentario3").val("");
 					$('#comentar_seleccion').modal('toggle');
