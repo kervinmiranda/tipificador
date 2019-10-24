@@ -240,13 +240,13 @@ if(isset($_SESSION['user'])){
 		$data = "0";
 		$update = updateRegister();		
 		if ($update != "0"){
-			$data = insertGestion($_POST['id'], $_POST['comentario']);
+			$data = insertCommnent($_POST['id'], $_POST['comentario']);
 		}
 		echo $data;
 	}
 
 	//Insert Gestion
-	function insertGestion($id, $comment){
+	function insertCommnent($id, $comment){
 		$objdatabase = new Database();
 		$sql = $objdatabase->prepare("INSERT INTO call_gestion (id, fecha, gestor, comentario) VALUES (:id, :fecha, :userid, :comentario)");
 		$sql->bindParam(':id', $id, PDO::PARAM_STR);
@@ -304,10 +304,10 @@ if(isset($_SESSION['user'])){
 	// Massive Comment
 	function massiveComment(){
 		$selected = $_POST['selected'];
-		$comentario = utf8_decode(trim($_POST['comentario']));					
+		$comentario = trim($_POST['comentario']);
 		$errors = "";
 		foreach ($selected as &$id) {
-			$insert =  insertGestion($id, $comentario);
+			$insert =  insertCommnent($id, $comentario);
 			if ($insert != '0'){
 				$errors .= $id.", "; 
 			}
@@ -344,6 +344,7 @@ if(isset($_SESSION['user'])){
 			break;
 		case "editRegister":
 			editRegister();
+			break;
 		case "searchById":
 			searchById();
 			break;

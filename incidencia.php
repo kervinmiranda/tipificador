@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /***************************************************************************************************************************
                                                          SISTEMA GEBNET
 ****************************************************************************************************************************/
@@ -141,11 +141,10 @@ var nivel = <?php echo $_SESSION['nivel'];?>
 		}else{
 			$('#comentario2').parent().removeClass('has-error').addClass('has-success');
 		}
-
 		bootbox.confirm('¿Seguro que desea guardar el comentario?', function(result){
 			if (result == true){
 				comentario = $("#comentario2").val();
-				$.post("include/pdo/incidencia.php", {id:id, function:"insertcomment", comentario:comentario}, function(data){
+				$.post("include/pdo/incidencia.php", {id:id, function:"insertComment", comentario:comentario}, function(data){
 					if (data  == 0){
 						$('#error').html('<strong>¡Error!</strong> Error al Editar la Incidencia, Intente Nuevamente').fadeIn(1000).fadeOut(5000);
 					}else{
@@ -219,7 +218,6 @@ var nivel = <?php echo $_SESSION['nivel'];?>
 			 idx = table.row( this ).index();
 			 selected.push( idx );
 		});
-
 		if (selected != ""){
 			$('#editar_selección').modal('toggle');
 		}else{
@@ -244,11 +242,9 @@ var nivel = <?php echo $_SESSION['nivel'];?>
 			return false;
 		}else{
 			$('#comentario4').parent().removeClass('has-error').addClass('has-success');
-		}			
-
+		}
 		bootbox.confirm('¿Seguro que Desea Editar la Selección Masiva??', function(result){
 			if (result == true){
-				accion = "gestion_masiva";
 				estatus = $("#estatus2").val();
 				comentario = $("#comentario4").val();
 				$("#lista tbody tr").filter(".selected").each(function (index) {
@@ -257,11 +253,10 @@ var nivel = <?php echo $_SESSION['nivel'];?>
 					var id = $(idxid).text();
 					selected.push( id );
 				});//End Each
-				$.post("include/guardar_registro.php", {selected:selected,accion:accion,estatus:estatus,comentario:comentario}, function(data){
-					if (data  == 0){
-						$('#error').html('<strong>¡Error!</strong> Error al Editar los Registros, Intente Nuevamente').fadeIn(1000).fadeOut(5000);
+				$.post("include/pdo/incidencia.php", {selected:selected, function:"massiveEdit", estatus:estatus, comentario:comentario}, function(data){
+					if (data  != 1){
+						$('#error').html('<strong>¡Error!</strong> Error al Editar los Registros ' + data + ', Intente Nuevamente').fadeIn(1000).fadeOut(5000);
 					}
-
 					if (data == 1){
 						$('#mensaje').html('<strong>¡Exito!</strong> Incidencias Editadas Correctamente').fadeIn(1000).fadeOut(5000);
 						$('#lista').DataTable().ajax.reload();
@@ -357,18 +352,19 @@ $("#boton_buscar_masiva").click(function(){
 		"bDestroy": true,
         select: true,
 		"ajax": {
-	    		"url": "include/pdo/incidencia.php",
-	    		"data": {
-	                function:"getIncidents"
-	                },
-				"type": 'POST'
+    		"url": "include/pdo/incidencia.php",
+    		"data": {
+                function:"getIncidents",
+                estatus: "Abierta" 
+                },
+			"type": 'POST'
 	  	},
 		"sPaginationType": "full_numbers",
 		"language":{ 
-				"url": "../DataTables/locale/Spanish.json"
-			},
+			"url": "../DataTables/locale/Spanish.json"
+		},
 		aLengthMenu: [[10,50,100],[10,50,100]],
-			"iDisplayLength": 10,
+		"iDisplayLength": 10,
 		dom: 'Bflrtip',
 		buttons: getbuttonsIncidents(nivel)
 	});
@@ -452,23 +448,15 @@ $("#boton_buscar_masiva").click(function(){
         <div id="masivo1" class="oculto col-xs-12 col-sm-1">
             <img src="imagenes/comentar2.png" name="coment_masivo" id="coment_masivo" class="cursor" title="Comentar Selección" data-toggle="tooltip" data-target="#comentar_seleccion">
         </div>
-
         <div id="masivo2" class="oculto col-xs-12 col-sm-1">
             <img src="imagenes/gestion2.png" name="edit_masivo" id="edit_masivo" class="cursor" data-toggle="tooltip" title="Editar Selección">
         </div>
         <?php
             }if($nivel < 3){
         ?>
-
         <div align="center" class="col-xs-12 col-sm-1">
             <img src="imagenes/filter-icon.png" name="boton_buscar_masiva" id="boton_buscar_masiva" class="cursor" data-toggle="tooltip" title="Filtro o Búsqueda Masiva">
-        </div>
-
-        <div align="center" class="col-xs-12 col-sm-1">
-        <form method="POST">
-            <input type="image" id="boton" src="imagenes/excel.png" onclick = "this.form.action = 'exceli.php'" data-toggle="tooltip" title="Exportar para Excel"/>
-        </form>
-        </div>
+        </div>        
 	<?php
     	}
     ?>
