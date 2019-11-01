@@ -9,59 +9,30 @@
 	}
 
 	// Function Show and hide buttons report
-	function getbuttonsList(niv){
+	function getbuttons(niv, columns, title){
 		var buttons = "";
 		if (niv < 3){
 			var buttons = [
 				{ 
 					extend: 'copy',
-					title: 'Reporte de Tipificaciones',
+					title: title,
 					text: 'Copiar',
 					exportOptions: {
-					  columns: [ 0,1,2,3,4,5,6,7,8]
+					  columns: columns
 					}
 				},
 				{
 					extend: 'excel',
-					title: 'Reporte de Tipificaciones',
+					title: title,
 					exportOptions: {
-					  columns: [ 0,1,2,3,4,5,6,7,8]
+					  columns: columns
 				}
 			}];			
 		}else{
 			var buttons = [];
 		}
 		return buttons;
-	}
-
-	function getbuttonsIncidents(niv){
-		var buttons = "";
-		if (niv < 3){
-			var buttons = [
-				{ 
-					extend: 'copy',
-					title: 'Reporte de Incidencias',
-					text: 'Copiar',
-					exportOptions: {
-					  columns: [ 0,1,2,3,4,5,6,7]
-					}
-				},
-				{
-					extend: 'excelHtml5',
-					customize: function( xlsx ) {
-					    var sheet = xlsx.xl.worksheets['sheet1.xml'];					 
-					    $('row c[r^="G"]', sheet).attr( 't', 's' );
-					},
-					title: 'Reporte de Incidencias',
-					exportOptions: {
-					  columns: [ 0,1,2,3,4,5,6,7]
-				}
-			}];			
-		}else{
-			var buttons = [];
-		}
-		return buttons;
-	}
+	}	
 
 	$(function() {
 		function reposition() {

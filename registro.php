@@ -369,10 +369,11 @@ var obj = jQuery.parseJSON('<?php echo json_encode($submotivos)?>');
             <div class="form-group col-xs-12 col-md-6 col-lg-4">
                	<label class="col-xs-12" for="codigo">Gu&iacute;a o Tracking</label>
                 <div class="input-group">
-                <input type="text" name="guia" id="guia" class="form-control text-uppercase validar" placeholder="WR01-XXXXXXXX" maxlength="35">
-                <div class="input-group-btn">                    
-                    <button class="btn" type="button" data-toggle="tooltip" id="search2" title="Consultar"><i class="glyphicon glyphicon-search"></i></button>
-                    </div>
+	                <input type="text" name="guia" id="guia" class="form-control text-uppercase validar" placeholder="WR01-XXXXXXXX" maxlength="35">
+	                <div class="input-group-btn">                    
+	                    <button class="btn" type="button" data-toggle="tooltip" id="search2" title="Consultar"><i class="glyphicon glyphicon-search"></i>
+	                    </button>
+	                </div>
                 </div>
            	</div>
             <?php

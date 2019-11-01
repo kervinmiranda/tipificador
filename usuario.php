@@ -487,7 +487,7 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 	                    <h3 class="panel-title">Editar Usuario</h3>
 	                </div>
 	                <div class="panel-body">
-	                      <div class="form-group col-xs-12 col-md-6 col-lg-4 text-center">
+	                    <div class="form-group col-xs-12 col-md-6 col-lg-4 text-center">
 	                        <label>Cédula</label>
 	                        <input  type="text" name="cedula2" id="cedula2" size="15" maxlength="8" class="form-control uncopypaste text-center" readonly>
 	                    </div>

@@ -136,7 +136,7 @@ if(isset($_SESSION['user'])){
 							'guiatracking' => $value['guiatracking'],
 							'estatus' => $value['estatus'],
 							'mensaje' => '<img src="imagenes/comentar.png" class="mensaje cursor" id="'.$value['id'].'" data-toggle="modal" data-placement="bottom" data-target="#comentar" title="Comentar">',
-							'edit' => '<img src="imagenes/edit.png" class="edit cursor" id="'.$value['id'].'" data-toggle="modal" data-placement="bottom" data-target="#editar" title="Editar">'
+							'edit' => '<img src="imagenes/edit.png" class="edit cursor" id="'.$value['id'].'" title="Editar Estatus">'
 					);
 					}
 					$json['success'] = true;
@@ -162,8 +162,7 @@ if(isset($_SESSION['user'])){
 							'sub_motivo' => $value['sub_motivo'],
 							'libced' => $value['libced'],
 							'guiatracking' => $value['guiatracking'],
-							'estatus' => $value['estatus'],
-							'mensaje' => '<img src="imagenes/comentar.png" class="mensaje cursor" id="'.$value['id'].'" data-toggle="modal" data-placement="bottom" data-target="#comentar" title="Comentar">',
+							'estatus' => $value['estatus'],							
 							'edit' => '<img src="imagenes/edit.png" class="edit cursor" id="'.$value['id'].'" data-toggle="modal" data-placement="bottom" data-target="#editar" title="Editar">'
 					);
 					}

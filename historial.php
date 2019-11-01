@@ -7,32 +7,61 @@ include_once 'include/variables.php';
 if(isset($_SESSION['user'])){
 ?>
 <?php echo $doctype?>
-<!-- Arquivos utilizados pelo jQuery lightBox plugin -->
-<!-- include CSS & JS files -->
-<!-- CSS file -->
+<!-- CSS files -->
 <link rel="stylesheet" href="../bootstrap/css/bootstrap.css">
 <link rel="stylesheet" href="../DataTables/css/dataTables.bootstrap.css">
 <link rel="stylesheet" href="../DataTables/css/responsive.bootstrap.min.css">
+<link rel="stylesheet" href="../DataTables/css/buttons.dataTables.min.css"> 
 <link rel="stylesheet" href="../DataTables/css/select.dataTables.min.css">
 <link rel="stylesheet" href="../bootstrap/css/bootstrap-submenu.css">
-<link rel="stylesheet" href="../css/jquery-ui.css">
+<link rel="stylesheet" href="../bootstrap/css/bootstrap-datepicker.css">
 <link rel="stylesheet" href="css/call.css">
 <!-- jQuery files -->
 <script src="../js/jquery.js"></script>
-<script src="../js/jquery-ui.js"></script>
 <script src="../bootstrap/js/bootstrap.js"></script>
 <script src="../DataTables/js/jquery.dataTables.js"></script>
 <script src="../DataTables/js/dataTables.bootstrap.js"></script>
 <script src="../DataTables/js/dataTables.select.js"></script>
 <script src="../DataTables/js/dataTables.responsive.min.js"></script>
+<script src="../DataTables/js/dataTables.buttons.min.js"></script>
+<script src="../DataTables/js/buttons.flash.min.js"></script>
+<script src="../DataTables/js/jszip.min.js"></script>
+<script src="../DataTables/js/pdfmake.min.js"></script>
+<script src="../DataTables/js/vfs_fonts.js"></script>
+<script src="../DataTables/js/buttons.html5.min.js"></script>
+<script src="../DataTables/js/buttons.print.min.js"></script>
 <script src="../bootstrap/js/bootstrap-submenu.js"></script>
 <script src="../bootstrap/js/bootbox.min.js"></script>
+<script src="../bootstrap/js/bootstrap-datepicker.js"></script>
+<script src="../bootstrap/js/locale/bootstrap-datepicker.es.js"></script>
 <script src="../js/jquery.numeric.js"></script>
 <script src="js/libreriajs.js"></script>
+<script src="js/moment.js"></script>
 <script type="text/javascript">
+
 $(document).ready(function(){
+	var id;
 	var seleccion = false;
 	var nivel = <?php echo $_SESSION['nivel'];?>
+	
+	//Aplica los filtros cuando se selecciona una fecha
+	$.fn.dataTable.ext.search.push(
+	    function( settings, data, dataIndex ) {
+	        if (moment($('#apertura').val(), 'YYYY-MM-DD', true).isValid()){
+	        	var min = moment($('#apertura').val());        	
+	        }
+	      	if (moment($('#cierre').val(), 'YYYY-MM-DD', true).isValid()){
+	        	var max = moment($('#cierre').val());        	
+	        }        
+	        var apertura = moment(data[1], 'YYYY-MM-DD');
+	       	if ( (isNaN( min ) && isNaN( max )) || (apertura >= min && isNaN( max )) || (apertura <= max && isNaN(min)) || (apertura >= min && apertura <= max)     
+	            )
+	        {
+	           return true; 
+	        }
+	        return false;
+	    }
+	);
 
 	//Activa Menú
 	$("#menu4").attr('class','active');
@@ -54,8 +83,7 @@ $(document).ready(function(){
 							fecha = record.fecha;
 							gestor = record.gestor;
 							estatus = record.estatus;
-							comentario = record.comentario;
-							
+							comentario = record.comentario;							
 							var row = $("<tr />");
 							$("<td />").appendTo(row).append(fecha);
 							$("<td />").appendTo(row).append(gestor);
@@ -105,7 +133,6 @@ $(document).ready(function(){
 		}else{
 			$('#comentario').parent().removeClass('has-error').addClass('has-success');
 		}
-
 		bootbox.confirm('¿Seguro que desea Editar la Incidencia?', function(result){
 			if (result == true){
 				accion = 'gestion';
@@ -165,7 +192,7 @@ $(document).ready(function(){
 								edit = record.edit
 								$('#lista').DataTable().row.add( [
 									id,
-									fecha,
+									apertura,
 									cierre,
 									departamento,
 									motivo,
@@ -173,7 +200,6 @@ $(document).ready(function(){
 									libced,
 									guiatracking,
 									estatus,
-									mensaje,
 									edit
 								] ).draw();
 							}//End if $.isNumeric(index)
@@ -201,38 +227,6 @@ $(document).ready(function(){
 		}
 	});
 
-	//Mostrar ventana para exportar a Excel
-	$("#filtro").click(function() {
-		$('#exportar').modal('toggle');
-		$('#usuario option:first-child, #tipo option:first-child').prop('selected', 'selected');
-		$('#fecha1, #fecha2').val('');
-		$('#usuario, #tipo, #fecha1, #fecha2').parent().removeClass('has-error has-success');
-	});
-
-
-	//Mostrar u Ocultar Rangos de Fecha
-	$('#tipo').change(function(){
-		var tipo = $('#tipo').val();
-		switch (tipo){
-			case 'apertura':
-			case 'cierre':
-						$('#rangos, #fecha1, #fecha2').parent().removeClass('oculto');
-			break;
-			case 'seleccion':
-				$('#rangos, #fecha1, #fecha2').parent().addClass('oculto');
-				var table = $('#lista').DataTable();
-			  	var selected = [];
-				$("#lista tbody tr").filter(".selected").each(function (index) {
-			  		idx = table.row( this ).index();
-			  		idxid =  table.cell(idx,0).data();
-			  		var id = $(idxid).text();
-			  		selected.push(id);
-		  	  	});//End Each
-				$('#seleccionados').attr('value', selected);
-			break;
-		}//End Switch	
-
-	});
 
 	//Mostrar ventana edición masivo
 	$("#edit_masivo").click(function(){
@@ -252,20 +246,48 @@ $(document).ready(function(){
 		}
 	});
 
+	//Editar seleccion masiva
+	$("#boton4").click(function(){
+	var table = $('#lista').DataTable();
+	var selected = [];
+		if ($("#estatus2 option:selected").index() == 0){
+			$('#estatus2').parent().addClass('has-error');
+			return false;
+		}else{
+			$('#estatus2').parent().removeClass('has-error').addClass('has-success');
+		}
 
-	//Función para colocar los Textos a tipo fecha
-	$('#fecha1').datepicker({
-		dateFormat: 'dd/mm/yy',
-		maxDate: 0, minDate:'01/09/2015',
-		onSelect: function(dateText, inst) {
-			var minimo = new Date($('#fecha1').datepicker('getDate'));
-			var maximo = new Date($('#fecha1').datepicker('getDate'));
-			minimo.setDate(minimo.getDate());
-			$('input#fecha2').datepicker('option', 'minDate', minimo);
+		if ($("#comentario4").val().length < 6){
+			$('#comentario4').parent().addClass('has-error');
+			$('#comentario4').attr('placeholder','Campo Obligatorio');
+			return false;
+		}else{
+			$('#comentario4').parent().removeClass('has-error').addClass('has-success');
+		}
+		bootbox.confirm('¿Seguro que Desea Editar la Selección Masiva??', function(result){
+			if (result == true){
+				estatus = $("#estatus2").val();
+				comentario = $("#comentario4").val();
+				$("#lista tbody tr").filter(".selected").each(function (index) {
+					idx = table.row( this ).index();
+					idxid =  table.cell(idx,0).data();
+					var id = $(idxid).text();
+					selected.push( id );
+				});//End Each
+				$.post("include/pdo/incidencia.php", {selected:selected, function:"massiveEdit", estatus:estatus, comentario:comentario}, function(data){
+					if (data  != 1){
+						$('#error').html('<strong>¡Error!</strong> Error al Editar los Registros ' + data + ', Intente Nuevamente').fadeIn(1000).fadeOut(5000);
+					}
+					if (data == 1){
+						$('#mensaje').html('<strong>¡Exito!</strong> Incidencias Editadas Correctamente').fadeIn(1000).fadeOut(5000);
+						$('#lista').DataTable().ajax.reload();
+					}
+					//End if
+				});//End post
+					$('#editar_selección').modal('toggle');
 			}
-		});
-
-	$("#fecha2").datepicker({dateFormat: 'dd/mm/yy', maxDate: 0});	
+		});//End Bootbox Function
+	});	
 
 	//Convertir la tabla en datatable
 	$('#lista').DataTable( {
@@ -282,13 +304,53 @@ $(document).ready(function(){
 		"sPaginationType": "full_numbers",
 		"language":{ 
 			"url": "../DataTables/locale/Spanish.json"
-		},
+		},		
 		aLengthMenu: [[10,50,100],[10,50,100]],
 		"iDisplayLength": 10,
 		dom: 'Bflrtip',
-		buttons: getbuttonsIncidents(nivel)
+		buttons: getbuttons(nivel, [0,1,2,3,4,5,6,7,8], 'Historial de Incidencias')
 	});
 
+	// Al cambiar lasfechas aplica el filtro
+    $('#apertura, #cierre').change( function() {
+        $('#lista').DataTable().draw();
+    });
+
+    //Función para colocar los Textos a tipo fecha
+	$("#apertura").datepicker({
+		language: "es",
+	  	format: "yyyy-mm-dd",
+	  	endDate: new Date(),
+	  	autoclose: true,
+	    todayBtn:  1,
+	    autoclose: true,
+	}).on('changeDate', function (selected) {
+	    var minDate = new Date(selected.date.valueOf());
+	    $('#cierre').datepicker('setStartDate', minDate);
+	});
+	$("#cierre").datepicker({
+		language: "es",
+	  	format: "yyyy-mm-dd",
+	  	endDate: new Date(),
+	  	autoclose: true,
+	}).on('changeDate', function (selected) {
+	        var maxDate = new Date(selected.date.valueOf());
+	        $('#apertura').datepicker('setEndDate', maxDate);
+	});
+
+	//Borrar filtro de fechas
+	$('#clearInit').click( function() {
+		if ($('#apertura').val()!=''){
+         	$('#apertura').val('');
+			$('#lista').DataTable().draw();
+		}
+    });
+    $('#clearEnd').click( function() {
+		if ($('#cierre').val()!=''){
+         	$('#cierre').val('');
+			$('#lista').DataTable().draw();
+		}
+    });
 });
 
 </script>
@@ -315,48 +377,69 @@ $(document).ready(function(){
     </div>        
 
 	<div class="row">
-    <div class="col-xs-12">
-    	<table id="lista" class="table table-striped table-bordered text-center dt-responsive table-hover nowrap" cellspacing="0" width="100%">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Apertura</th>
-                    <th>Cierre</th>
-                    <th>Departamento</th>
-                    <th>Motivo</th>
-                    <th>Sub Motivo</th>
-                    <th>LIB o C&eacute;dula</th>
-                    <th>Gu&iacute;a o Tracking</th>
-                    <th>Estatus</th>
-                    <?php
-					if ($nivel < 2){
-					echo '<th>Editar</th>';
-					}
-					?>
-                </tr>
-            </thead>
-            <tfoot>
-                <tr>
-                    <th>Id</th>
-                    <th>Fecha</th>
-                    <th>Cierre</th>
-                    <th>Departamento</th>
-                    <th>Motivo</th>
-                    <th>Sub Motivo</th>
-                    <th>LIB o C&eacute;dula</th>
-                    <th>Gu&iacute;a o Tracking</th> 
-                    <th>Estatus</th>
-                    <?php
-					if ($nivel < 2){
-					echo '<th>Editar</th>';
-					}
-					?>
-                </tr>
-            </tfoot>
-            <tbody>
-            </tbody>
-		</table>
-	</div><!-- End col -->
+		<div class="form-group col-xs-12 col-md-3 col-md-offset-3 col-lg-2 col-lg-offset-4 text-center">
+	        <label>Fecha Apertura</label>
+	        <div class="input-group">
+		        <input  type="text" name="apertura" id="apertura" class="form-control text-center" readonly>
+		        <div class="input-group-btn">                    
+                    <button class="btn" data-toggle="tooltip" id="clearInit" title="borrar"><i class="glyphicon glyphicon-remove"></i>
+                    </button>
+                </div>
+	        </div>
+	    </div>
+
+	    <div class="form-group col-xs-12 col-md-3 col-lg-2 text-center">
+	        <label>Fecha Cierre</label>
+	        <div class="input-group">
+	        	<input  type="text" name="cierre" id="cierre" class="form-control text-center" readonly>
+	        	<div class="input-group-btn">
+                    <button class="btn" data-toggle="tooltip" id="clearEnd" title="borrar"><i class="glyphicon glyphicon-remove"></i>
+                    </button>
+                </div>
+	        </div>
+	    </div>
+	    <div class="col-xs-12">    	
+	    	<table id="lista" class="table table-striped table-bordered text-center dt-responsive table-hover nowrap" cellspacing="0" width="100%">
+	            <thead>
+	                <tr>
+	                    <th>Id</th>
+	                    <th>Apertura</th>
+	                    <th>Cierre</th>
+	                    <th>Departamento</th>
+	                    <th>Motivo</th>
+	                    <th>Sub Motivo</th>
+	                    <th>LIB o C&eacute;dula</th>
+	                    <th>Gu&iacute;a o Tracking</th>
+	                    <th>Estatus</th>
+	                    <?php
+						if ($nivel < 2){
+						echo '<th>Editar</th>';
+						}
+						?>
+	                </tr>
+	            </thead>
+	            <tfoot>
+	                <tr>
+	                    <th>Id</th>
+	                    <th>Apertura</th>
+	                    <th>Cierre</th>
+	                    <th>Departamento</th>
+	                    <th>Motivo</th>
+	                    <th>Sub Motivo</th>
+	                    <th>LIB o C&eacute;dula</th>
+	                    <th>Gu&iacute;a o Tracking</th> 
+	                    <th>Estatus</th>
+	                    <?php
+						if ($nivel < 2){
+						echo '<th>Editar</th>';
+						}
+						?>
+	                </tr>
+	            </tfoot>
+	            <tbody>
+	            </tbody>
+			</table>		
+		</div><!-- End col -->	
     </div><!-- End row --> 
 	<?php
     if($nivel < 2){
@@ -445,7 +528,7 @@ $(document).ready(function(){
             <div class="panel panel-primary luminoso text-center">
             	<button type="button" class="close" data-dismiss="modal">&times;</button>
                 <div class="panel-heading">
-                    <h3 class="panel-title">Editar Incidencia</h3>
+                    <h3 class="panel-title">Reabrir Incidencias</h3>
                 </div>
 
                 <div class="panel-body">
@@ -455,7 +538,6 @@ $(document).ready(function(){
 	                        <option>Seleccionar...</option>
 	                        <option>Abierta</option>
 	                        <option>En Verificaci&oacute;n</option>
-	                        <option>Cerrada</option>
 	                    </select>
                     </div>
 
@@ -491,49 +573,8 @@ $(document).ready(function(){
                 </div>
             </div><!--End panel -->
     	</div><!-- End Dialog -->
-    </div><!-- end Modal -->    
-
-    <!-- Modal Exportar a Excel -->
-    <div id="exportar" class="modal fade" role="dialog" tabindex='-1'>
-    	<div class="modal-dialog modal-sm">
-        	<div class="panel panel-primary luminoso text-center">
-            	<button type="button" class="close" data-dismiss="modal">&times;</button>
-                <div class="panel-heading">
-                    <h3 class="panel-title">Exportar a Excel</h3>
-                </div>
-
-                <div class="panel-body">
-                <form name="formExcel" id="formExcel" action="excelh.php" method="POST">
-                    <input type="hidden" name="seleccionados" id="seleccionados">
-                    <div class="form-group col-xs-12">
-                        <label for="tipo">Criterio de Consulta</label>
-                        <select name="tipo" id="tipo" class="form-control" >
-                            <option>Seleccionar...</option>
-                            <option value="apertura">Fecha de Apertura</option>
-                            <option value="cierre">Fecha de Cierre</option>
-                        </select>
-                    </div>
-                    <div class="form-group col-xs-12 oculto">
-                        <label id="rangos">Rangos</label>
-                    </div>            
-
-                    <div class="form-group col-xs-12 oculto">
-                        <label for="fecha1">Fecha Inicial</label>
-                        <input type="text" name="fecha1" id="fecha1" class="form-control text-center" readonly style="background-color:#FFF">
-                    </div>
-                    <div class="form-group col-xs-12 oculto">
-                        <label for="fecha2">Fecha Final</label>
-                        <input type="text" name="fecha2" id="fecha2" class="form-control text-center" readonly style="background-color:#FFF">
-                    </div>         
-
-                    <div class="form-group col-xs-12">
-                        <img src="imagenes/excel.png" id="excel" title="Exportar a Excel" class="cursor">
-                    </div>
-                 </form>
-                </div>
-            </div><!--End panel -->
-    	</div><!-- End Dialog -->
     </div><!-- end Modal -->
+    
     </div><!--end. content-->
      <?php echo $footer?>
 </body>

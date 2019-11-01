@@ -15,7 +15,6 @@ if(isset($_SESSION['user'])){
 <link rel="stylesheet" href="../DataTables/css/select.dataTables.min.css">
 <link rel="stylesheet" href="../bootstrap/css/bootstrap-submenu.css">
 <link rel="stylesheet" href="css/call.css">
-
 <!-- jQuery files -->
 <script src="../js/jquery.js"></script>
 <script src="../bootstrap/js/bootstrap.js"></script>
@@ -366,10 +365,8 @@ $("#boton_buscar_masiva").click(function(){
 		aLengthMenu: [[10,50,100],[10,50,100]],
 		"iDisplayLength": 10,
 		dom: 'Bflrtip',
-		buttons: getbuttonsIncidents(nivel)
+		buttons: getbuttons(nivel, [0,1,2,3,4,5,6,7], 'Reporte de Incidencias')
 	});
-
-
 });
 
 </script>
