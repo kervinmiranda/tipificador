@@ -36,7 +36,6 @@ if(isset($_SESSION['user'])){
 <script type="text/javascript">
 $(document).ready(function(){
 var id;
-var fila;
 var nivel = <?php echo $_SESSION['nivel'];?>
 
 //Activar Menú
@@ -84,7 +83,6 @@ var nivel = <?php echo $_SESSION['nivel'];?>
 //Función para mostar ventana de edición
 	$('#lista tbody').on('click', '.edit', function(){
 		id = ($(this).attr('id'));
-		fila = $(this).parents().get(1);
 		$("#incidencia").html('Inicidencia: '+id);
 		$('#estatus option:first-child').prop('selected', 'selected');
 		$('#comentario').val('');

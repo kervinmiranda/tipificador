@@ -260,6 +260,7 @@ $(document).ready(function(){
 	//Datapicker Button
 	$('#month').datepicker({
 		language: "es",
+		startDate: '-10y',
 	  	format: "MM yyyy",
 	  	minViewMode: 1,
 	  	endDate: new Date(),

@@ -41,7 +41,6 @@ if(isset($_SESSION['user'])){
 
 $(document).ready(function(){
 	var id;
-	var seleccion = false;
 	var nivel = <?php echo $_SESSION['nivel'];?>
 	
 	//Aplica los filtros cuando se selecciona una fecha
@@ -114,7 +113,6 @@ $(document).ready(function(){
 		$('#estatus option:first-child').attr('selected', 'selected');
 		$('#comentario').val('');
 		$('#estatus, #comentario').parent().removeClass('has-error has-success');
-		$("#editar").modal('toggle');
 	});
 
 	//Función para Editar Incidencia
@@ -138,15 +136,15 @@ $(document).ready(function(){
 				accion = 'gestion';
 				estatus = $('#estatus').val();
 				comentario = $('#comentario').val();
-				$.post('include/guardar_registro.php', {id:id,accion:accion,estatus:estatus,comentario:comentario}, function(data){
+				$.post('include/pdo/incidencia.php', {id:id, function:"editIncident", estatus:estatus, comentario:comentario}, function(data){
 					if (data  == 0){
-						$('#error').html('<strong>¡Error!</strong> Error al Editar la Incidencia, Intente Nuevamente').fadeIn(1000).fadeOut(5000);
+					$('#error').html('<strong>¡Error!</strong> Error al Editar la Incidencia, Intente Nuevamente').fadeIn(1000).fadeOut(5000);
 					}else{
 						$('#mensaje').html('<strong>¡Exito!</strong> Incidencia ' + id + ' Editada Correctamente').fadeIn(1000).fadeOut(5000);
-						$('#lista').dataTable().fnDeleteRow(fila);
+						$('#lista').DataTable().ajax.reload();
+						$('#editar').modal('toggle');
 					}//End if
 				});//End post
-				$('#editar').modal('toggle');
 			}//End if
 		});//End Bootbox Function
 	});//End Function
@@ -226,7 +224,6 @@ $(document).ready(function(){
 			$('#masivo').hide(300);
 		}
 	});
-
 
 	//Mostrar ventana edición masivo
 	$("#edit_masivo").click(function(){
@@ -319,6 +316,7 @@ $(document).ready(function(){
     //Función para colocar los Textos a tipo fecha
 	$("#apertura").datepicker({
 		language: "es",
+		startDate: '-10y',
 	  	format: "yyyy-mm-dd",
 	  	endDate: new Date(),
 	  	autoclose: true,
@@ -330,6 +328,7 @@ $(document).ready(function(){
 	});
 	$("#cierre").datepicker({
 		language: "es",
+		startDate: '-10y',
 	  	format: "yyyy-mm-dd",
 	  	endDate: new Date(),
 	  	autoclose: true,
@@ -382,7 +381,8 @@ $(document).ready(function(){
 	        <div class="input-group">
 		        <input  type="text" name="apertura" id="apertura" class="form-control text-center" readonly>
 		        <div class="input-group-btn">                    
-                    <button class="btn" data-toggle="tooltip" id="clearInit" title="borrar"><i class="glyphicon glyphicon-remove"></i>
+                    <button class="btn" data-toggle="tooltip" id="clearInit" title="borrar"><i class="glyphicon glyphicon-erase
+"></i>
                     </button>
                 </div>
 	        </div>
@@ -393,7 +393,8 @@ $(document).ready(function(){
 	        <div class="input-group">
 	        	<input  type="text" name="cierre" id="cierre" class="form-control text-center" readonly>
 	        	<div class="input-group-btn">
-                    <button class="btn" data-toggle="tooltip" id="clearEnd" title="borrar"><i class="glyphicon glyphicon-remove"></i>
+                    <button class="btn" data-toggle="tooltip" id="clearEnd" title="borrar"><i class="glyphicon glyphicon-erase
+"></i>
                     </button>
                 </div>
 	        </div>

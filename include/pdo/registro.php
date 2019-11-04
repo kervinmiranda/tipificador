@@ -213,6 +213,7 @@ if(isset($_SESSION['user'])){
 				$data[] = array($link, $fecha, $usuario, $departamento, $motivo, $sub_motivo, $libced, $usersocial, $guiatracking, $edit);
 			}			
 		}
+		$objdatabase = null;
 		$results = array("aaData"=>$data);
 		echo json_encode($results);
 	}
