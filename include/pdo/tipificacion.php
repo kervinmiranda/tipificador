@@ -5,7 +5,7 @@
 setlocale(LC_TIME, 'es_VE'); # Localiza en español es_Venezuela
 date_default_timezone_set('America/Caracas');
 include_once 'database.php';
-session_start();
+@session_start();
 if(isset($_SESSION['user'])){
 	$fecha = date('Y/m/d'); //Obtener la fecha del día	
 
@@ -106,7 +106,6 @@ if(isset($_SESSION['user'])){
 		$count = $sql->rowCount();
 		if ($count){
 			$boolean = true;
-		}else{
 		}
 		$objdatabase = null;
 		return $boolean;
@@ -189,7 +188,6 @@ if(isset($_SESSION['user'])){
 				break;
 		}
 	}
-
 }else{
 	echo "notSessionActive";
 }

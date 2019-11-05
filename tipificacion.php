@@ -29,7 +29,6 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 <script src="../js/jquery.numeric.js"></script>
 <script src="js/libreriajs.js"></script>
 <script>
-
 $(document).ready(function(){
 
 //Activar Menú
@@ -140,7 +139,7 @@ $(document).ready(function(){
 			if (result == true){
 				$.post("include/pdo/tipificacion.php", {function:"changeStatus", id:id, estatus:estatus}, function(data){
 					if (data  == '0'){
-						$('#error').html('<strong>¡Error!</strong> Error al Editar el Estatus, Intente mas tarde').$('#error').fadeIn(1000).fadeOut(5000);
+						$('#error').html('<strong>¡Error!</strong> Error al Editar el Estatus, Intente mas tarde').fadeIn(1000).fadeOut(5000);
 					}else if (data == '1'){
 						$('#mensaje').html('<strong>¡Exito!</strong> Estatus Editado Correctamente').fadeIn(1000).fadeOut(5000);
 						$('#lista').DataTable().ajax.reload();
@@ -148,7 +147,7 @@ $(document).ready(function(){
 				});//End post
 			}//End if
 		});//End Function
-	});//End Function	
+	});//End Function
 
 //Convertir la tabla en Datatable
 	$('#lista').dataTable({

@@ -5,9 +5,9 @@
 setlocale(LC_TIME, 'es_VE'); # Localiza en español es_Venezuela
 date_default_timezone_set('America/Caracas');
 include_once 'database.php';
-session_start();
+@session_start();
 if(isset($_SESSION['user'])){
-
+	
 	//Search Lib o cédula
 	function searchLib(){
 		$tipo = $_POST['tipo'];

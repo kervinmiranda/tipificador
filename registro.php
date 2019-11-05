@@ -2,12 +2,12 @@
 /*************************************************************************************************************************
                                                          SISTEMA GEBNET
 ****************************************************************************************************************************/
-include_once 'include/pdo/paises.php';
+include_once 'include/pdo/pais.php';
 include_once 'include/pdo/tipificacion.php';
 include_once 'include/fecha.php';
 include_once 'include/variables.php';
 if(isset($_SESSION['user'])){
-	$paises = getPaises();
+	$paises = getCountries();
 	$motivos = getMotives();	
 	$submotivos = getSubMotives();
 ?>
@@ -145,7 +145,7 @@ var obj = jQuery.parseJSON('<?php echo json_encode($submotivos)?>');
 	$('#search').click(function(){		
 		var value = $('#codigo').val();	
 		var tipo = 'lib';
-		if (codigo == ''){
+		if (value == ''){
 			bootbox.alert('Debe Escribir un Código LIB o Cédula');
 			return false;
 		}		
@@ -198,7 +198,7 @@ var obj = jQuery.parseJSON('<?php echo json_encode($submotivos)?>');
 	$('#search2').click(function(){		
 		var value = $('#guia').val();
 		var tipo = 'guia';
-		if (codigo == ""){
+		if (value == ""){
 			bootbox.alert ('Debe Escribir la Guía o Traking');
 			return false;
 		}		
@@ -367,7 +367,7 @@ var obj = jQuery.parseJSON('<?php echo json_encode($submotivos)?>');
                 </div>
             </div>      
             <div class="form-group col-xs-12 col-md-6 col-lg-4">
-               	<label class="col-xs-12" for="codigo">Gu&iacute;a o Tracking</label>
+               	<label class="col-xs-12" for="guia">Gu&iacute;a o Tracking</label>
                 <div class="input-group">
 	                <input type="text" name="guia" id="guia" class="form-control text-uppercase validar" placeholder="WR01-XXXXXXXX" maxlength="35">
 	                <div class="input-group-btn">                    

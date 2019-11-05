@@ -113,7 +113,7 @@ $(document).ready(function(){
 				$('#motivo2, #submotivo2, #cedlib2, #comentario').parent().removeClass('has-error has-success');
 				$('#comentario').val('');
 			}//End if
-		}, "json");//End post		
+		}, "json");//End post	
 	});	
 
 	//Guardar Edición

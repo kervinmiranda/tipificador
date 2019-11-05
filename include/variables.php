@@ -25,9 +25,10 @@ $principal = '<li id="menu1"><a href="principal.php">Principal</a></li>';
 $administracion = '<li id="menu2" class="dropdown">
 			   		<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Administración<span class="caret"></span></a>
 						<ul class="dropdown-menu" role="menu">
-							<li><a href="usuario.php">Usuarios</a></li>
-							<li><a href="tipificacion.php">Tipificaciones</a></li>
 							<li><a href="calidad.php">Calidad</a></li>
+							<li><a href="pais.php">Paises</a></li>							
+							<li><a href="tipificacion.php">Tipificaciones</a></li>
+							<li><a href="usuario.php">Usuarios</a></li>						
 						</ul>
 					</li><!-- .dropdown -->';
 //Módulo 2
