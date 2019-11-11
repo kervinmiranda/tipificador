@@ -152,9 +152,8 @@ if(isset($_SESSION['user'])){
 	function getUsers(){
 		$objdatabase = new Database();
 		$sql = $objdatabase->prepare("SELECT * FROM call_usuario");
-		$sql->execute(); // se confirma que el query exista
-		//Verificamos el resultado
-		$count = $sql->rowCount();
+		$sql->execute();//Exjecutamos la Query		
+		$count = $sql->rowCount();//Verificamos el resultado
 		if ($count){
 			$result = $sql->fetchAll();
 			$data = array();

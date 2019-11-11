@@ -2,7 +2,6 @@
 /*************************************************************************************************************************
                                                          SISTEMA GEBNET
 ****************************************************************************************************************************/
-require 'include/pdo/database.php';
 include_once 'include/pdo/modulos.php';
 include_once 'include/fecha.php';
 include_once 'include/variables.php';

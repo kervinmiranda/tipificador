@@ -2,7 +2,7 @@
 /*************************************************************************************************************************
 													SISTEMA GEBNET
 **************************************************************************************************************************/
-include_once 'include/conexion.php';
+include_once 'include/pdo/atributo.php';
 include_once 'include/fecha.php';
 include_once 'include/variables.php';
 if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
@@ -21,7 +21,6 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 	}
 </style>
 
-
 <!-- Archivos JavaScript -->	
 <script src="../js/jquery.js"></script>
 <script src="../bootstrap/js/bootstrap.js"></script>
@@ -35,6 +34,12 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 <script src="js/libreriajs.js"></script>
 <script>
 $(document).ready(function(){
+var id;
+var atributos;
+var aspectos;
+
+fillAtributes();
+
 //Activar Menú
 	$("#menu2").attr('class','active');	
 
@@ -85,9 +90,8 @@ $(document).ready(function(){
 		if (contador < 1){			
 			bootbox.confirm('¿Seguro que Desea Guardar el Atributo?', function(result){				
 				if (result == true){
-					accion = 'nuevo';
 					descripcion = $('#descripcion').val();
-					$.post( "include/guardar_atributo.php", {accion:accion, descripcion:descripcion}, function(data){							
+					$.post( "include/pdo/atributo.php", {function:"insertAtribute", descripcion:descripcion}, function(data){							
 					})
 					.done(function(data) {								
 						switch (data){
@@ -96,7 +100,10 @@ $(document).ready(function(){
 							break;							
 							case '1':
 								$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Exito!</strong> Atributo Guardado Correctamente</div>');
-								$('#listaAtributo').DataTable().ajax.reload();						
+								<?php
+									$atributos = getAtributes();
+								?>
+								$('#listaAtributo').DataTable().ajax.reload();										
 							break;
 							case '0':
 								$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');						
@@ -118,14 +125,13 @@ $(document).ready(function(){
 
 //Mostrar ventana de Edición de Atributo
 	$('#listaAtributo tbody').on('click', '.edit', function(){
-		var id = $(this).attr('id');
-		$.post( "include/buscar_atributo.php", {id:id}, function(data){							
-		})//End function
+		id = $(this).attr('id');
+		$.post( "include/pdo/atributo.php", {function:"getAtribute", id:id}, function(data){							
+		}, "json")//End function
 		.done(function(data){								
-		 	var obj = jQuery.parseJSON(data);
-				$('#numero').val(id);
-				$('#descripcion2').val(descripcion = obj.descripcion).parent().removeClass('has-error has-success');
-				$('#editarAtributo').modal('toggle');																							
+		 		$('#numero').val(id);
+				$('#descripcion2').val(data.descripcion).parent().removeClass('has-error has-success');
+				$('#editarAtributo').modal('toggle');																					
 		 })//End function done
 		.fail(function(){
 			$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');
@@ -136,7 +142,7 @@ $(document).ready(function(){
 	});//End Function
 
 //Validar y Editar Atributo
-	$("#save2").click(function(){		
+	$("#save2").click(function(){	
 		var contador = 0;
 		$("#editar input").filter('.validar').each(function (index) { 
 			if ($(this).val() == ''){
@@ -151,10 +157,9 @@ $(document).ready(function(){
 		if (contador < 1){			
 			bootbox.confirm('¿Seguro que Desea Editar el Atributo?', function(result){				
 				if (result == true){
-					accion = 'editar';
 					id = $('#numero').val();
 					descripcion = $('#descripcion2').val();
-					$.post( "include/guardar_atributo.php", {accion:accion, id:id, descripcion:descripcion}, function(data){							
+					$.post( "include/pdo/atributo.php", {function:"editAtribute", id:id, descripcion:descripcion}, function(data){							
 					})
 					.done(function(data) {								
 						switch (data){
@@ -162,7 +167,8 @@ $(document).ready(function(){
 								$('#mensajes').prepend('<div class="alert alert-warning text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Info!</strong> El Atributo ya Se Encuentra Registrado, Verifique e Intente Nuevamente</div>');
 							break;							
 							case '1':
-								$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Exito!</strong> Atributo Editardo Correctamente</div>');						
+								$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Exito!</strong> Atributo Editardo Correctamente</div>');
+								fillAtributes();		
 								$('#listaAtributo').DataTable().ajax.reload();
 							break;
 							case '0':
@@ -185,11 +191,10 @@ $(document).ready(function(){
 
 //Cambiar el estatus del Atributo
 	$('#listaAtributo tbody').on('click', '.camb', function(){	
-		var accion = "estatus";
 		var id = $(this).attr('id');
 		bootbox.confirm('¿Seguro que desea el cambiar el Estatus del Atributo?', function(result){
 			if (result == true){
-				$.post( "include/guardar_atributo.php", {accion:accion, id:id}, function(data){							
+				$.post( "include/pdo/atributo.php", {function:"statusAtribute", id:id}, function(data){							
 					})
 					.done(function(data) {								
 						switch (data){													
@@ -200,7 +205,8 @@ $(document).ready(function(){
 							case '0':
 								$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');						
 							break;								
-						}//End switch																						
+						}//End switch
+						fillAtributes();																			
 					 })//End function done
 					.fail(function() {
 						$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');
@@ -212,11 +218,16 @@ $(document).ready(function(){
 	});//End Function
 
 //Mostrar Formulario de Nuevo Aspecto
-	$("#boton2").click(function() {
+	$("#boton2").click(function() {		
 		$('body input[type=text]').val('').parent().removeClass('has-error has-success');
 		$('body textarea').val('').parent().removeClass('has-error has-success');
 		$('#atributoe option:first').prop("selected", "selected");
-		$('#atributoe').parent().removeClass('has-error has-success');		
+		$('#atributoe').parent().removeClass('has-error has-success');
+		$('#atributoe').empty();
+		$('#atributoe').append("<option>Seleccionar...</option>");
+		$.each(atributos, function(i,item){
+				$('#atributoe').append("<option>"+ atributos[i].descripcion +"</option>");    					
+		});	
 	});
 
 //Validar y Agregar Aspecto
@@ -243,10 +254,9 @@ $(document).ready(function(){
 		if (contador < 1){			
 			bootbox.confirm('¿Seguro que Desea Guardar el Aspecto a Evaluar?', function(result){				
 				if (result == true){
-					accion = 'nuevo';
 					atributo = $('#atributoe').val();								
 					descripcion = $('#descripcione').val();					
-					$.post( "include/guardar_aspecto.php", {accion:accion, atributo:atributo, descripcion:descripcion}, function(data){							
+					$.post( "include/pdo/aspecto.php", {function:"insertAspect", atributo:atributo, descripcion:descripcion}, function(data){							
 					})
 					.done(function(data) {								
 						switch (data){
@@ -278,14 +288,14 @@ $(document).ready(function(){
 //Mostrar VEntana de Edición de Aspecto
 	$('#listaAspecto tbody').on('click', '.edit', function(){
 		var id = $(this).attr('id');
-		$.post( "include/buscar_aspecto.php", {id:id}, function(data){							
-		})//End function
-		.done(function(data){								
-		 	var obj = jQuery.parseJSON(data);
-				$('#numeroa').val(id);
-				$('#atributoe2').val(obj.id_atributo).parent().removeClass('has-error has-success');				
-				$('#descripcione2').val(obj.descripcion).parent().removeClass('has-error has-success');				
-				$('#editarAspecto').modal('toggle');																							
+		$.post( "include/pdo/aspecto.php", {function:"getAspect", id:id}, function(data){							
+		}, "json")//End function
+		.done(function(data){
+			console.log(data);				
+			$('#numeroa').val(id);
+			$('#atributoe2').val(data.id_atributo).parent().removeClass('has-error has-success');		
+			$('#descripcione2').val(data.descripcion).parent().removeClass('has-error has-success');				
+			$('#editarAspecto').modal('toggle');																				
 		 })//End function done
 		.fail(function(){
 			$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');					
@@ -319,10 +329,9 @@ $(document).ready(function(){
 			bootbox.confirm('¿Seguro que Desea Editar el Aspecto a Evaluar?', function(result){				
 				if (result == true){
 					id = $('#numeroa').val();
-					accion = 'editar';					
 					atributo = $('#atributoe2').val();							
 					descripcion = $('#descripcione2').val();					
-					$.post( "include/guardar_aspecto.php", {accion:accion, id:id, atributo:atributo, descripcion:descripcion}, function(data){
+					$.post( "include/pdo/aspecto.php", {function:"editAspect", id:id, atributo:atributo, descripcion:descripcion}, function(data){
 					})
 					.done(function(data) {								
 						switch (data){
@@ -357,7 +366,7 @@ $(document).ready(function(){
 		var id = $(this).attr('id');
 		bootbox.confirm('¿Seguro que desea el cambiar el Estatus del Aspecto a Evaluar?', function(result){
 			if (result == true){
-				$.post( "include/guardar_aspecto.php", {accion:accion, id:id}, function(data){							
+				$.post( "include/pdo/aspecto.php", {function:"statusAspect", id:id}, function(data){							
 					})
 					.done(function(data) {								
 						switch (data){													
@@ -574,151 +583,6 @@ $(document).ready(function(){
 	});
 
 
-// $("#").click(function updateDataTableSelectAllCtrl(table){
-//    var $table             = table.table().node();
-//    var $chkbox_all        = $('tbody input[type="checkbox"]', $table);
-//    var $chkbox_checked    = $('tbody input[type="checkbox"]:checked', $table);
-//    var chkbox_select_all  = $('thead input[name="select_all"]', $table).get(0);
-
-//    // If none of the checkboxes are checked
-//    if($chkbox_checked.length === 0){
-//       chkbox_select_all.checked = false;
-//       if('indeterminate' in chkbox_select_all){
-//          chkbox_select_all.indeterminate = false;
-//       }
-
-//    // If all of the checkboxes are checked
-//    } else if ($chkbox_checked.length === $chkbox_all.length){
-//       chkbox_select_all.checked = true;
-//       if('indeterminate' in chkbox_select_all){
-//          chkbox_select_all.indeterminate = false;
-//       }
-
-//    // If some of the checkboxes are checked
-//    } else {
-//       chkbox_select_all.checked = true;
-//       if('indeterminate' in chkbox_select_all){
-//          chkbox_select_all.indeterminate = true;
-//       }
-//    }
-// });
-
-
-// $(document).ready(function (){
-//    // Array holding selected row IDs
-//    var rows_selected = [];
-//    var table = $('#tforms').DataTable({
-//      'ajax': {
-// //         'url': '/lab/articles/jquery-datatables-checkboxes/ids-arrays.txt' 
-// 			"url": "include/guardar_form.php",
-// 			"data": {                       
-// 				formulario:formulario             
-// 				},
-// 			"type": 'POST'
-//       },
-//       'columnDefs': [{
-//          'targets': 0,
-//          'searchable': false,
-//          'orderable': false,
-//          'width': '1%',
-//          'className': 'dt-body-center',
-//          'render': function (data, type, full, meta){
-//              return '<input type="checkbox">';
-//          }
-//       }],
-//       'order': [[1, 'asc']],
-//       'rowCallback': function(row, data, dataIndex){
-//          // Get row ID
-//          var rowId = data[0];
-
-//          // If row ID is in the list of selected row IDs
-//          if($.inArray(rowId, rows_selected) !== -1){
-//             $(row).find('input[type="checkbox"]').prop('checked', true);
-//             $(row).addClass('selected');
-//          }
-//       }
-//    });
-
-//    // Handle click on checkbox
-//    $('#tforms tbody').on('click', 'input[type="checkbox"]', function(e){
-//       var $row = $(this).closest('tr');
-
-//       // Get row data
-//       var data = table.row($row).data();
-
-//       // Get row ID
-//       var rowId = data[0];
-
-//       // Determine whether row ID is in the list of selected row IDs 
-//       var index = $.inArray(rowId, rows_selected);
-
-//       // If checkbox is checked and row ID is not in list of selected row IDs
-//       if(this.checked && index === -1){
-//          rows_selected.push(rowId);
-
-//       // Otherwise, if checkbox is not checked and row ID is in list of selected row IDs
-//       } else if (!this.checked && index !== -1){
-//          rows_selected.splice(index, 1);
-//       }
-
-//       if(this.checked){
-//          $row.addClass('selected');
-//       } else {
-//          $row.removeClass('selected');
-//       }
-
-//       // Update state of "Select all" control
-//       updateDataTableSelectAllCtrl(table);
-
-//       // Prevent click event from propagating to parent
-//       e.stopPropagation();
-//    });
-
-//    // Handle click on table cells with checkboxes
-//    $('#tforms').on('click', 'tbody td, thead th:first-child', function(e){
-//       $(this).parent().find('input[type="checkbox"]').trigger('click');
-//    });
-
-//    // Handle click on "Select all" control
-//    $('thead input[name="select_all"]', table.table().container()).on('click', function(e){
-//       if(this.checked){
-//          $('#tforms tbody input[type="checkbox"]:not(:checked)').trigger('click');
-//       } else {
-//          $('#tforms tbody input[type="checkbox"]:checked').trigger('click');
-//       }
-
-//       // Prevent click event from propagating to parent
-//       e.stopPropagation();
-//    });
-
-//    // Handle table draw event
-//    table.on('draw', function(){
-//       // Update state of "Select all" control
-//       updateDataTableSelectAllCtrl(table);
-//    });
-
-//    // Handle form submission event 
-//    $('#frm-tforms').on('submit', function(e){
-//       var form = this;
-      
-//       // Iterate over all selected checkboxes
-//       $.each(rows_selected, function(index, rowId){
-//          // Create a hidden element 
-//          $(form).append(
-//              $('<input>')
-//                 .attr('type', 'hidden')
-//                 .attr('name', 'id[]')
-//                 .val(rowId)
-//          );
-//       });
-//    });
-
-// });
-
-
-
-
-
 //Mostrar Nuevo Formulario
 	$('#boton4').click(function(){
 		var formulario = 'nuevo';
@@ -732,29 +596,8 @@ $(document).ready(function(){
 			"type": 'POST'
 		},
 		"sPaginationType": "full_numbers",
-		"language": {
-			"sProcessing":     "Procesando...",
-			"sLengthMenu":     "Mostrar _MENU_ registros",
-			"sZeroRecords":    "No se encontraron resultados",
-			"sEmptyTable":     "Ningún dato disponible en esta tabla",
-			"sInfo":           "Mostrando del _START_ al _END_ de un total de _TOTAL_ registros",
-			"sInfoEmpty":      "Mostrando del 0 al 0 de un total de 0 registros",
-			"sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-			"sInfoPostFix":    "",
-			"sSearch":         "Buscar:",
-			"sUrl":            "",
-			"sInfoThousands":  ",",
-			"sLoadingRecords": "Cargando...",
-			"oPaginate": {
-				"sFirst":    "Primero",
-				"sLast":     "Último",
-				"sNext":     "Siguiente",
-				"sPrevious": "Anterior"
-			},
-			"oAria": {
-				"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-				"sSortDescending": ": Activar para ordenar la columna de manera descendente"
-			}	
+		"language":{ 
+			"url": "../DataTables/locale/Spanish.json"
 		},
 		"aaSorting": [[ 0, "asc" ],[1, "asc"],[2, "asc"], [3, "asc"]],
 		aLengthMenu: [[10,50,100],[10,50,100]],
@@ -766,60 +609,6 @@ $(document).ready(function(){
 		$('#all').prop('checked', true);
 //		$('#boton4').addClass('oculto');		// Comentado para evitar que el icono de + se esconda luego de cerrar el modal de nuevo formulario!
 	});//End Function
-
-
-
-//Mostrar Editar Formulario
-// 	$('#editarFormulario').click(function(){
-// 		var formulario = 'editar';
-// 		$('#tforms').dataTable().fnDestroy();
-// 		$('#tforms').dataTable({
-// 		"ajax": {
-// 			"url": "include/consultaf2.php",
-// 			"data": {                       
-// 				formulario:formulario             
-// 				},
-// 			"type": 'POST'
-// 		},
-// 		"sPaginationType": "full_numbers",
-// 		"language": {
-// 			"sProcessing":     "Procesando...",
-// 			"sLengthMenu":     "Mostrar _MENU_ registros",
-// 			"sZeroRecords":    "No se encontraron resultados",
-// 			"sEmptyTable":     "Ningún dato disponible en esta tabla",
-// 			"sInfo":           "Mostrando del _START_ al _END_ de un total de _TOTAL_ registros",
-// 			"sInfoEmpty":      "Mostrando del 0 al 0 de un total de 0 registros",
-// 			"sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-// 			"sInfoPostFix":    "",
-// 			"sSearch":         "Buscar:",
-// 			"sUrl":            "",
-// 			"sInfoThousands":  ",",
-// 			"sLoadingRecords": "Cargando...",
-// 			"oPaginate": {
-// 				"sFirst":    "Primero",
-// 				"sLast":     "Último",
-// 				"sNext":     "Siguiente",
-// 				"sPrevious": "Anterior"
-// 			},
-// 			"oAria": {
-// 				"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-// 				"sSortDescending": ": Activar para ordenar la columna de manera descendente"
-// 			}	
-// 		},
-// 		"aaSorting": [[ 0, "asc" ],[1, "asc"],[2, "asc"], [3, "asc"]],
-// 		aLengthMenu: [[10,50,100],[10,50,100]],
-// 			"iDisplayLength": 100,
-// 		"bPaginate": false,
-// 	});	
-	
-// 		$('#editarFormulario').removeClass('oculto');
-// 		$('#all').prop('checked', true);
-// //		$('#boton4').addClass('oculto');		// Comentado para evitar que el icono de + se esconda luego de cerrar el modal de nuevo formulario!
-// 	});//End Function
-
-
-
-
 
 
 //Guardar Formulario
@@ -923,17 +712,6 @@ $(document).ready(function(){
 					grupo = $('#gruposi2').val();				// gestor?
 					porc = $('#porc').val();
 					nombre = $('#nombre').val();
-
-     //       			$idSituacion = $lista[0];
-					// $descripcionAtributo =  utf8_encode($lista[1]);	
-					// $descripcionAspecto =  utf8_encode($lista[2]);
-					// $situacionGrupo =  utf8_encode($lista[3]);							
-					// $descripcionSituacion = utf8_encode($lista[4]);
-					// $check = '<input type="checkbox" value = "'.$idSituacion.'" class = "item" checked>';
-					// $porc = '<select class="form-control" id = "'.$idSituacion.'">'.$option.'</select>';
-					// $data[] = array($descripcionAtributo, $descripcionAspecto, $situacionGrupo, $descripcionSituacion, $check, $porc);
-
-
 					$.post( "include/guardar_form.php", {accion:accion, id:id, aspecto:aspecto, descripcion:descripcion, grupo:grupo, porc:porc, nombre:nombre}, function(data){
 					})
 					.done(function(data) {
@@ -964,7 +742,6 @@ $(document).ready(function(){
 		}		 
 	});//End Function Validar y Agregar
 
-
 //Cambiar el Estatus del Formulario
 	$('#listaFormulario tbody').on('click', '.camb', function(){	
 		var accion = "estatus";
@@ -994,140 +771,140 @@ $(document).ready(function(){
 		});//End Function bootbox
 	});//End Function
 
-
-//Cancelar Nuevo Formulario
-	// $('#cancelform').click(function(){
-	// 	$('#nuevoFormulario').addClass('oculto');
-	// 	$('#boton4').removeClass('oculto');
-	// });
-
 //Convertir la tabla en Datatable
 	$('#listaAtributo').dataTable({
-		"ajax": "include/consultaa.php",
+		"ajax": {
+    		"url": "include/pdo/atributo.php",
+    		"data": {
+                function:"getAllAtributes"
+                },
+			"type": 'POST'
+	  	},
 		"sPaginationType": "full_numbers",
-		"language": {
-			"sProcessing":     "Procesando...",
-			"sLengthMenu":     "Mostrar _MENU_ registros",
-			"sZeroRecords":    "No se encontraron resultados",
-			"sEmptyTable":     "Ningún dato disponible en esta tabla",
-			"sInfo":           "Mostrando del _START_ al _END_ de un total de _TOTAL_ registros",
-			"sInfoEmpty":      "Mostrando del 0 al 0 de un total de 0 registros",
-			"sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-			"sInfoPostFix":    "",
-			"sSearch":         "Buscar:",
-			"sUrl":            "",
-			"sInfoThousands":  ",",
-			"sLoadingRecords": "Cargando...",
-			"oPaginate": {
-				"sFirst":    "Primero",
-				"sLast":     "Último",
-				"sNext":     "Siguiente",
-				"sPrevious": "Anterior"
-			},
-			"oAria": {
-				"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-				"sSortDescending": ": Activar para ordenar la columna de manera descendente"
-			}		
+		"columnDefs": [
+				{         
+		              "render": function ( data, type, row ) {
+		              	switch (row[2]){
+		              		case "1":
+		              		status = '<img src="imagenes/activo.png">';
+		              		break;
+		              		case "0":
+		              		status = '<img src="imagenes/inactivo.png">';
+		              		break;
+		              		default:
+		              		status = '';
+		              		break;
+		              	}
+		                  return status;
+		              },
+		              "targets": 2
+		        },
+		      	{         
+		              "render": function ( data, type, row ) {
+		              		edit = '<img src="imagenes/edit.png" class="edit cursor" title="Editar Atributo" id="'+ row[0]+'">';
+		              		switch (row[2]){
+			              		case "1":
+			              			block = '<img src="imagenes/block2.png" class="camb cursor" title="Bloquear Atributo" id="'+ row[0] +'">';
+			              		break;
+			              		case "0":
+			              			block = '<img src="imagenes/block.png" class="camb cursor" title="Desbloquear Atributo" id="'+ row[0] +'">';
+			              		break;
+			              		default:
+			              			block = '';
+			              		break;
+			              	}		              		
+		                  return  edit + ' ' + block;
+		              },
+		              "targets": 3
+		        }           
+		      ],
+		"language":{ 
+			"url": "../DataTables/locale/Spanish.json"
 		},
 		aLengthMenu: [[10,50,100],[10,50,100]],
 			"iDisplayLength": 10
 	});
-	
+
 	$('#listaAspecto').dataTable({
-		"ajax": "include/consultaasp.php",
+		"ajax": {
+    		"url": "include/pdo/aspecto.php",
+    		"data": {
+                function:"getAllAspects"
+                },
+			"type": 'POST'
+	  	},
 		"sPaginationType": "full_numbers",
-		"language": {
-			"sProcessing":     "Procesando...",
-			"sLengthMenu":     "Mostrar _MENU_ registros",
-			"sZeroRecords":    "No se encontraron resultados",
-			"sEmptyTable":     "Ningún dato disponible en esta tabla",
-			"sInfo":           "Mostrando del _START_ al _END_ de un total de _TOTAL_ registros",
-			"sInfoEmpty":      "Mostrando del 0 al 0 de un total de 0 registros",
-			"sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-			"sInfoPostFix":    "",
-			"sSearch":         "Buscar:",
-			"sUrl":            "",
-			"sInfoThousands":  ",",
-			"sLoadingRecords": "Cargando...",
-			"oPaginate": {
-				"sFirst":    "Primero",
-				"sLast":     "Último",
-				"sNext":     "Siguiente",
-				"sPrevious": "Anterior"
-			},
-			"oAria": {
-				"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-				"sSortDescending": ": Activar para ordenar la columna de manera descendente"
-			}		
-		},
-		aLengthMenu: [[10,50,100],[10,50,100]],
-			"iDisplayLength": 10
-	});
-	
-	$('#listaSituacion').dataTable({
-		"ajax": "include/consultasi.php",
-		"sPaginationType": "full_numbers",
-		"language": {
-			"sProcessing":     "Procesando...",
-			"sLengthMenu":     "Mostrar _MENU_ registros",
-			"sZeroRecords":    "No se encontraron resultados",
-			"sEmptyTable":     "Ningún dato disponible en esta tabla",
-			"sInfo":           "Mostrando del _START_ al _END_ de un total de _TOTAL_ registros",
-			"sInfoEmpty":      "Mostrando del 0 al 0 de un total de 0 registros",
-			"sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-			"sInfoPostFix":    "",
-			"sSearch":         "Buscar:",
-			"sUrl":            "",
-			"sInfoThousands":  ",",
-			"sLoadingRecords": "Cargando...",
-			"oPaginate": {
-				"sFirst":    "Primero",
-				"sLast":     "Último",
-				"sNext":     "Siguiente",
-				"sPrevious": "Anterior"
-			},
-			"oAria": {
-				"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-				"sSortDescending": ": Activar para ordenar la columna de manera descendente"
-			}		
-		},
-		aLengthMenu: [[10,50,100],[10,50,100]],
-			"iDisplayLength": 10
-	});	
-
-	$('#listaFormulario').dataTable({
-		"ajax": "include/consultaf.php",
-		"sPaginationType": "full_numbers",
-		"language": {
-			"sProcessing":     "Procesando...",
-			"sLengthMenu":     "Mostrar _MENU_ registros",
-			"sZeroRecords":    "No se encontraron resultados",
-			"sEmptyTable":     "Ningún dato disponible en esta tabla",
-			"sInfo":           "Mostrando del _START_ al _END_ de un total de _TOTAL_ registros",
-			"sInfoEmpty":      "Mostrando del 0 al 0 de un total de 0 registros",
-			"sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
-			"sInfoPostFix":    "",
-			"sSearch":         "Buscar:",
-			"sUrl":            "",
-			"sInfoThousands":  ",",
-			"sLoadingRecords": "Cargando...",
-			"oPaginate": {
-				"sFirst":    "Primero",
-				"sLast":     "Último",
-				"sNext":     "Siguiente",
-				"sPrevious": "Anterior"
-			},
-			"oAria": {
-				"sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
-				"sSortDescending": ": Activar para ordenar la columna de manera descendente"
-			}		
+		"columnDefs": [
+				{         
+		              "render": function ( data, type, row ) {
+		              	switch (row[3]){
+		              		case "1":
+		              		status = '<img src="imagenes/activo.png">';
+		              		break;
+		              		case "0":
+		              		status = '<img src="imagenes/inactivo.png">';
+		              		break;
+		              		default:
+		              		status = '';
+		              		break;
+		              	}
+		                  return status;
+		              },
+		              "targets": 3
+		        },
+		      	{         
+		              "render": function ( data, type, row ) {
+		              		edit = '<img src="imagenes/edit.png" class="edit cursor" title="Editar Aspecto" id="'+ row[0]+'">';
+		              		switch (row[3]){
+			              		case "1":
+			              			block = '<img src="imagenes/block2.png" class="camb cursor" title="Bloquear Aspecto" id="'+ row[0] +'">';
+			              		break;
+			              		case "0":
+			              			block = '<img src="imagenes/block.png" class="camb cursor" title="Desbloquear Aspecto" id="'+ row[0] +'">';
+			              		break;
+			              		default:
+			              			block = '';
+			              		break;
+			              	}		              		
+		                  return  edit + ' ' + block;
+		              },
+		              "targets": 4
+		        }           
+		      ],
+		"language":{
+			"url": "../DataTables/locale/Spanish.json"
 		},
 		aLengthMenu: [[10,50,100],[10,50,100]],
 			"iDisplayLength": 10
 	});
 
+	/*$('#listaSituacion').dataTable({
+		"ajax": {
+    		"url": "include/pdo/situacion.php",
+    		"data": {
+                function:"getSituations"
+                },
+			"type": 'POST'
+	  	},
+		"sPaginationType": "full_numbers",
+		"language":{
+			"url": "../DataTables/locale/Spanish.json"
+		},
+		aLengthMenu: [[10,50,100],[10,50,100]],
+			"iDisplayLength": 10
+	});*/
 
-
+	function fillAtributes(){
+		$.post( "include/pdo/atributo.php", {function:"getAtributes"}, function(data){					
+		})
+		.done(function(data) {
+			atributos = jQuery.parseJSON(data);													
+		})//End function done
+		.fail(function() {
+		})//End function fail
+		.always(function() {						
+		});	//End function always		
+	}
 
 });//End Document Ready
 </script>
@@ -1191,8 +968,8 @@ $(document).ready(function(){
 	                    <thead>
 	                        <tr>
 	                            <th>N°</th>
-	                            <th>Aspecto</th>                                                       
-	                            <th>Atributo</th>
+	                            <th>Atributo</th>                                                       
+	                            <th>Aspecto</th>
 	                            <th>Estatus</th>
 	                            <th>Comandos</th>             
 	                        </tr>
@@ -1200,8 +977,8 @@ $(document).ready(function(){
 	                    <tfoot>        
 	                        <tr>
 	                            <th>N°</th>
-	                            <th>Aspecto</th>                                                               
-	                            <th>Atributo</th>
+	                            <th>Atributo</th>                                                               
+	                            <th>Aspecto</th>
 	                            <th>Estatus</th>
 	                            <th>Comandos</th>             
 	                        </tr>
@@ -1399,21 +1176,12 @@ $(document).ready(function(){
 	                	<form id="nuevoe">                 
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="atributoe">Atributo</label>
-	                       	<select id="atributoe" class="form-control validar">
-	                        	<?php
-									$atributos = mysql_query("SELECT id, descripcion FROM call_evaluacion_atributo WHERE estatus = '1'");
-										if (mysql_num_rows($atributos)){
-											echo '<option>Seleccionar...</option>';
-											while ($row = mysql_fetch_array($atributos)){
-												echo '<option value="'.$row['id'].'">'.utf8_encode($row['descripcion']).'</option>';
-											}//End while
-										}//End if						
-								?>                        
+	                       	<select id="atributoe" class="form-control validar">	                       		               
 	                        </select>
 	                    </div>                   
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="descripcione">Descripción</label>
-	                        <input type="text" name="descripcione" id="descripcione" class="form-control uncopypaste text-center validar">
+	                        <input type="text" name="descripcione" id="descripcione" class="form-control text-uppercase uncopypaste text-center validar">
 	                    </div>                                       
 	                    </form> 
 	                    <div class="form-group col-xs-12 text-center">
@@ -1441,20 +1209,19 @@ $(document).ready(function(){
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="atributoe2">Atributo</label>
 	                       	<select id="atributoe2" class="form-control validar">
-	                        	<?php
-									$atributos = mysql_query("SELECT id, descripcion FROM call_evaluacion_atributo WHERE estatus = '1'");
-										if (mysql_num_rows($atributos)){
-											echo '<option>Seleccionar...</option>';
-											while ($row = mysql_fetch_array($atributos)){
-												echo '<option value="'.$row['id'].'">'.utf8_encode($row['descripcion']).'</option>';
-											}//End while
-										}//End if						
-								?>                        
+	                       		<option>Seleccionar...</option>
+	                        	<?php                    
+				                    if (!is_null($atributos)){
+				               			foreach ($atributos as $key => $value){
+				               				echo '<option value="'.$value['id'].'">'.$value['descripcion'].'</option>';
+				               			}
+				               		}
+				                ?>                        
 	                        </select>
 	                    </div>                    
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="descripcione2">Descripción</label>
-	                        <input type="text" name="descripcione2" id="descripcione2" class="form-control text-center validar">
+	                        <input type="text" name="descripcione2" id="descripcione2" class="form-control text-uppercase text-center validar">
 	                    </div>					
 	                    </form> 
 	                    <div class="form-group col-xs-12 text-center">
@@ -1497,7 +1264,7 @@ $(document).ready(function(){
 	                    </div>                            
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="descripcions">Descripción</label>
-	                        <input type="text" name="descripcionsi" id="descripcionsi" class="form-control text-center validar">
+	                        <input type="text" name="descripcionsi" id="descripcionsi" class="form-control text-uppercase text-center validar">
 	                    </div>
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="gruposi">Grupo</label>
@@ -1548,7 +1315,7 @@ $(document).ready(function(){
 	                    </div>                 
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="descripcionsi2">Descripción</label>
-	                        <input type="text" name="descripcionsi2" id="descripcionsi2" class="form-control text-center validar">
+	                        <input type="text" name="descripcionsi2" id="descripcionsi2" class="form-control text-uppercase text-center validar">
 	                    </div>
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="gruposi2">Grupo</label>
@@ -1641,14 +1408,10 @@ $(document).ready(function(){
 							<input type="text" id="nombre" class="form-control"></input>
 						</div>
 					</form>
-
 						<div class="col-xs-12 col-md-8 col-lg-4 col-md-offset-2 col-lg-offset-4 text-center">
-							<input type="image" id="saveform2" src="imagenes/save.png" title="Guadar Formulario">
-<!--
-							<input type="image" id="cancelform" src="imagenes/close.png" title="Cancelar">
--->
-						</div>
-                                  	         
+							<input type="image" id="saveform2" src="imagenes/save.png" title="Guadar Formulario"><!--
+							<input type="image" id="cancelform" src="imagenes/close.png" title="Cancelar">-->
+						</div>                                  	         
 	                </div>
 	            </div><!--End panel -->
 	    	</div><!-- End Dialog -->
@@ -1661,7 +1424,6 @@ $(document).ready(function(){
 </body>
 </html>
 <?php
-mysql_close($conexion);
 }else{
 	header("location:index.php?alerta=salir");
 }

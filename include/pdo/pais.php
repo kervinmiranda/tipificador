@@ -26,8 +26,7 @@ if(isset($_SESSION['user'])){
 	function getAllCountries(){
 		$objdatabase = new Database();
 		$sql = $objdatabase->prepare("SELECT * FROM call_pais ORDER BY descripcion ASC");		
-		$sql->execute();//Exjecutamos la Query
-		
+		$sql->execute();//Exjecutamos la Query		
 		$count = $sql->rowCount();//Verificamos el resultado
 		$data = null;		
 		if($count){
@@ -78,7 +77,7 @@ if(isset($_SESSION['user'])){
 			$objdatabase = new Database();
 			$sql = $objdatabase->prepare("UPDATE call_pais SET descripcion =:name WHERE id =:id");
 			$sql->bindParam(':id', $id, PDO::PARAM_STR);
-			$sql->bindParam(':name', $name, PDO::PARAM_STR);
+			$sql->bindParam(':name', strtoupper(trim($name)), PDO::PARAM_STR);
 			$sql->execute(); // se confirma que el query existas		
 			$count = $sql->rowCount();//Verificamos el resultado
 			if ($count){

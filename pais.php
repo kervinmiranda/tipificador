@@ -2,7 +2,6 @@
 /*************************************************************************************************************************
                                                          SISTEMA GEBNET
 ****************************************************************************************************************************/
-require 'include/pdo/database.php';
 include_once 'include/pdo/modulos.php';
 include_once 'include/fecha.php';
 include_once 'include/variables.php';
@@ -176,7 +175,19 @@ if(isset($_SESSION['user']) && ($_SESSION['nivel'] < 2)){
 		        },
 		      	{         
 		              "render": function ( data, type, row ) {
-		                  return '<img src="imagenes/block.png" class="block cursor" id="'+ row[0] +'" data-toggle="modal" data-placement="bottom" data-target="#block" title="habilitar / deshabilitar País">' + ' ' +'<img src="imagenes/gestion.png" class="edit cursor" id="'+ row[0] +'" data-toggle="modal" data-placement="bottom" data-target="#editar" title="Editar País">';
+		              	edit =  '<img src="imagenes/edit.png" class="edit cursor" id="'+ row[0] +'" data-toggle="modal" data-placement="bottom" data-target="#editar" title="Editar País">';
+		              	switch (row[2]){
+			              		case "1":
+			              			block = '<img src="imagenes/block.png" class="block cursor" id="'+ row[0] +'" data-toggle="modal" data-placement="bottom" data-target="#block" title="Deshabilitar País">';
+			              		break;
+			              		case "0":
+			              			block = '<img src="imagenes/block2.png" class="block cursor" id="'+ row[0] +'" data-toggle="modal" data-placement="bottom" data-target="#block" title="Habilitar País">';
+			              		break;
+			              		default:
+			              			block = '';
+			              		break;
+			              	}		              		
+		                  return  edit + ' ' + block;
 		              },
 		              "targets": 3
 		        }           
