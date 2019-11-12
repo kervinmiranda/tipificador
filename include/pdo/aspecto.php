@@ -163,7 +163,7 @@ if(isset($_SESSION['user'])){
 				echo insertAspect($_POST['atributo'], $_POST['descripcion']);
 				break;
 			case "editAspect":
-				editAspect($_POST['id'], $_POST['atributo'], $_POST['descripcion']);
+				echo editAspect($_POST['id'], $_POST['atributo'], $_POST['descripcion']);
 				break;
 			case "statusAspect":
 				echo statusAspect($_POST['id']);

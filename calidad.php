@@ -91,7 +91,7 @@ fillAtributes();
 			bootbox.confirm('¿Seguro que Desea Guardar el Atributo?', function(result){				
 				if (result == true){
 					descripcion = $('#descripcion').val();
-					$.post( "include/pdo/atributo.php", {function:"insertAtribute", descripcion:descripcion}, function(data){							
+					$.post( "include/pdo/atributo.php", {function:"insertAtribute", descripcion:descripcion}, function(data){			
 					})
 					.done(function(data) {								
 						switch (data){
@@ -100,9 +100,6 @@ fillAtributes();
 							break;							
 							case '1':
 								$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Exito!</strong> Atributo Guardado Correctamente</div>');
-								<?php
-									$atributos = getAtributes();
-								?>
 								$('#listaAtributo').DataTable().ajax.reload();										
 							break;
 							case '0':
@@ -285,7 +282,7 @@ fillAtributes();
 		}		 
 	});//End Function Validar y Agregar
 
-//Mostrar VEntana de Edición de Aspecto
+//Mostrar Ventana de Edición de Aspecto
 	$('#listaAspecto tbody').on('click', '.edit', function(){
 		var id = $(this).attr('id');
 		$.post( "include/pdo/aspecto.php", {function:"getAspect", id:id}, function(data){							
@@ -293,9 +290,14 @@ fillAtributes();
 		.done(function(data){
 			console.log(data);				
 			$('#numeroa').val(id);
+			$('#atributoe2').empty();
+			$('#atributoe2').append("<option>Seleccionar...</option>");
+			$.each(atributos, function(i,item){
+					$('#atributoe2').append("<option>"+ atributos[i].descripcion +"</option>");    					
+			});
 			$('#atributoe2').val(data.id_atributo).parent().removeClass('has-error has-success');		
 			$('#descripcione2').val(data.descripcion).parent().removeClass('has-error has-success');				
-			$('#editarAspecto').modal('toggle');																				
+			$('#editarAspecto').modal('toggle');																			
 		 })//End function done
 		.fail(function(){
 			$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');					
@@ -555,33 +557,6 @@ fillAtributes();
 			}//End if		 
 		});//End Function bootbox
 	});//End Function
-
-// //Marcar y desmarcar todos los items
-	$('#all').click(function(){
-		estado = $('#all').prop('checked');		
-		switch (estado){
-			case true: $("#selected input[type=checkbox]").prop('checked', true);
-					   $("#selected select").prop('disabled', '');
-			break;
-
-			case false: $("#selected input[type=checkbox]").prop('checked', false);
-						$("#selected select").prop('disabled', 'disabled');
-			break
-		}//End switch
-	});//End Function
-
-//Check And Uncheck item 
-	$('#nuevoFormulario tbody').on('click', '.item', function(){
-		var id = $(this).val();
-		var estado = $(this).prop('checked');
-		switch (estado){
-			case true: $('#'+ id).prop('disabled','');					   
-			break;
-			case false: $('#'+ id).prop('disabled','disabled');						
-			break
-		}//End switch		
-	});
-
 
 //Mostrar Nuevo Formulario
 	$('#boton4').click(function(){
@@ -878,11 +853,11 @@ fillAtributes();
 			"iDisplayLength": 10
 	});
 
-	/*$('#listaSituacion').dataTable({
+	$('#listaSituacion').dataTable({
 		"ajax": {
     		"url": "include/pdo/situacion.php",
     		"data": {
-                function:"getSituations"
+                function:"getAllSituations"
                 },
 			"type": 'POST'
 	  	},
@@ -892,7 +867,7 @@ fillAtributes();
 		},
 		aLengthMenu: [[10,50,100],[10,50,100]],
 			"iDisplayLength": 10
-	});*/
+	});
 
 	function fillAtributes(){
 		$.post( "include/pdo/atributo.php", {function:"getAtributes"}, function(data){					
@@ -958,8 +933,8 @@ fillAtributes();
 	                </div><!-- End row -->
 				</div><!-- End Container -->                 
 	      	</div><!-- End Tab -->
-	            	
-	        <div id="aspectos" class="tab-pane fade"> 
+
+	        <div id="aspectos" class="tab-pane fade">
 	        	<div class="container-fluid">
 				<h4 class="text-center">Aspectos a Evaluar</h4>
 	                <div class="row">
@@ -1031,7 +1006,7 @@ fillAtributes();
 	                    </div><!-- End col -->
 	                </div><!-- End row -->
 				</div><!-- End Container -->                    		
-	      	</div><!-- End Tab -->	        
+	      	</div><!-- End Tab -->
 	       
 	       	<div id="formularios" class="tab-pane fade">
 	       		<h4 class="text-center">Formularios de Evaluación</h4>
@@ -1075,7 +1050,6 @@ fillAtributes();
 			                <div class="panel-heading">
 			                    <h4 class="panel-title">Nuevo Formulario</h4>                    
 			                </div>
-
 			                <div class="panel-body">
 								<div class="col-xs-12">
 				                    <table id="exampleform" class="table-condensed table-striped table-bordered table-hover" cellspacing="0" style="width:100%;">
@@ -1098,17 +1072,14 @@ fillAtributes();
 									<input type="text" id="nombre" class="form-control"></input>
 								</div>
 								<div class="col-xs-12 col-md-8 col-lg-4 col-md-offset-2 col-lg-offset-4 text-center">
-									<input type="image" id="saveform" src="imagenes/save.png" title="Guadar Formulario">
-									
+									<input type="image" id="saveform" src="imagenes/save.png" title="Guadar Formulario">				
 								</div>
 							</div>
-
-
 			            </div><!--End panel -->              
 			    	</div><!-- End Dialog -->
 			    </div><!-- end Modal -->
 			</div><!-- End div formularios -->
-	    </div><!-- End tab-content -->    
+	    </div><!-- End tab-content -->
 	    
 	    <!-- Div para contenido de los Mensajes -->
 	    <div id="mensajes" class="col-xs-12 col-md-8 col-md-offset-2 mensajes">
@@ -1133,9 +1104,9 @@ fillAtributes();
 	                        <input type="image" id="save" src="imagenes/save.png" title="Guardar Atributo">
 	                    </div>                                     	         
 	                </div>
-	            </div><!--End panel -->              
+	            </div><!--End panel -->      
 	    	</div><!-- End Dialog -->
-	    </div><!-- end Modal -->    
+	    </div><!-- end Modal -->
 	        
 	    <!-- Modal Editar Atributo -->
 	    <div id="editarAtributo" class="modal fade" role="dialog">
@@ -1208,15 +1179,7 @@ fillAtributes();
 	                    </div>
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="atributoe2">Atributo</label>
-	                       	<select id="atributoe2" class="form-control validar">
-	                       		<option>Seleccionar...</option>
-	                        	<?php                    
-				                    if (!is_null($atributos)){
-				               			foreach ($atributos as $key => $value){
-				               				echo '<option value="'.$value['id'].'">'.$value['descripcion'].'</option>';
-				               			}
-				               		}
-				                ?>                        
+	                       	<select id="atributoe2" class="form-control validar"> 		                        	                       
 	                        </select>
 	                    </div>                    
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
