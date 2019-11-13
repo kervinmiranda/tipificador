@@ -11,7 +11,7 @@ if(isset($_SESSION['user'])){
 	// Get Active Aspects 
 	function getAspects(){
 		$objdatabase = new Database();	
-		$sql = $objdatabase->prepare("SELECT * FROM call_evaluacion_aspecto");
+		$sql = $objdatabase->prepare("SELECT call_evaluacion_aspecto.id, call_evaluacion_atributo.descripcion, call_evaluacion_aspecto.descripcion, call_evaluacion_aspecto.estatus FROM call_evaluacion_aspecto INNER JOIN call_evaluacion_atributo ON call_evaluacion_aspecto.id_atributo = call_evaluacion_atributo.id WHERE call_evaluacion_atributo.estatus = '1' AND call_evaluacion_aspecto.estatus = '1'");
 		$sql->execute();//Exjecutamos la Query		
 		$count = $sql->rowCount();//Verificamos el resultado
 		$data = array();	
@@ -25,7 +25,7 @@ if(isset($_SESSION['user'])){
 	// Get All Aspects
 	function getAllAspects(){
 		$objdatabase = new Database();	
-		$sql = $objdatabase->prepare("SELECT * FROM call_evaluacion_aspecto");
+		$sql = $objdatabase->prepare("SELECT call_evaluacion_aspecto.id, call_evaluacion_atributo.descripcion, call_evaluacion_aspecto.descripcion, call_evaluacion_aspecto.estatus FROM call_evaluacion_aspecto INNER JOIN call_evaluacion_atributo ON call_evaluacion_aspecto.id_atributo = call_evaluacion_atributo.id");
 		$sql->execute();//Exjecutamos la Query		
 		$count = $sql->rowCount();//Verificamos el resultado
 		$data = array();	

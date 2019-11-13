@@ -114,19 +114,16 @@ if(isset($_SESSION['user'])){
 		$objdatabase = null;
 		return $data;
 	}
-
+	
 	if (isset($_POST['function'])){
 		$function  = $_POST['function']; //Obtener la Opción a realizar (Nuevo, editar, bloquear)
 		switch ($function) {
 			case "getAllSituations":
 				echo json_encode(array("aaData"=>getAllSituations()));
-				break;				
-			case "insertAspect":
-				insertAspect($_POST['atributo'], $_POST['descripcion']);
 				break;
-			case "editAspect":
-				editAspect($_POST['id'], $_POST['atributo'], $_POST['descripcion']);
-				break;
+			case "getSituations":
+				echo json_encode(getSituations());
+				break;			
 			default:
 				break;
 		}

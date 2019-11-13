@@ -39,6 +39,7 @@ var atributos;
 var aspectos;
 
 fillAtributes();
+fillAspects();
 
 //Activar Menú
 	$("#menu2").attr('class','active');	
@@ -165,7 +166,8 @@ fillAtributes();
 							break;							
 							case '1':
 								$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Exito!</strong> Atributo Editardo Correctamente</div>');
-								fillAtributes();		
+								fillAtributes();
+								fillAspects();
 								$('#listaAtributo').DataTable().ajax.reload();
 							break;
 							case '0':
@@ -201,9 +203,10 @@ fillAtributes();
 							break;
 							case '0':
 								$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');						
-							break;								
+							break;
 						}//End switch
-						fillAtributes();																			
+						fillAtributes();
+						fillAspects();
 					 })//End function done
 					.fail(function() {
 						$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');
@@ -223,7 +226,7 @@ fillAtributes();
 		$('#atributoe').empty();
 		$('#atributoe').append("<option>Seleccionar...</option>");
 		$.each(atributos, function(i,item){
-				$('#atributoe').append("<option>"+ atributos[i].descripcion +"</option>");    					
+				$('#atributoe').append('<option value="'+atributos[i].id + '">'+ atributos[i].descripcion + '</option>');				
 		});	
 	});
 
@@ -262,7 +265,8 @@ fillAtributes();
 							break;							
 							case '1':
 								$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Exito!</strong> Aspecto a Evaluar Guardado Correctamente</div>');
-								$('#listaAspecto').DataTable().ajax.reload();						
+								$('#listaAspecto').DataTable().ajax.reload();
+								fillAspects();
 							break;
 							case '0':
 								$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');						
@@ -293,7 +297,7 @@ fillAtributes();
 			$('#atributoe2').empty();
 			$('#atributoe2').append("<option>Seleccionar...</option>");
 			$.each(atributos, function(i,item){
-					$('#atributoe2').append("<option>"+ atributos[i].descripcion +"</option>");    					
+				$('#atributoe2').append('<option value="'+atributos[i].id + '">'+ atributos[i].descripcion + '</option>');				
 			});
 			$('#atributoe2').val(data.id_atributo).parent().removeClass('has-error has-success');		
 			$('#descripcione2').val(data.descripcion).parent().removeClass('has-error has-success');				
@@ -342,7 +346,8 @@ fillAtributes();
 							break;
 							case '1':
 								$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Exito!</strong> Aspecto a Evaluar Editado Correctamente</div>');
-								$('#listaAspecto').DataTable().ajax.reload();						
+								$('#listaAspecto').DataTable().ajax.reload();
+								fillAspects();
 							break;
 							case '0':
 								$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');						
@@ -395,7 +400,12 @@ fillAtributes();
 		$('body input[type=text]').val('').parent().removeClass('has-error has-success');
 		$('body textarea').val('').parent().removeClass('has-error has-success');
 		$('#atributosi option:first, #aspectosi option:first').prop("selected", "selected");
-		$('#atributosi, #aspectosi').parent().removeClass('has-error has-success');		
+		$('#atributosi, #aspectosi').parent().removeClass('has-error has-success');
+		$('#atributosi').empty();
+		$('#atributosi').append("<option>Seleccionar...</option>");
+		$.each(atributos, function(i,item){
+				$('#atributosi').append("<option>"+ atributos[i].descripcion +"</option>");    					
+		});		
 	});
 
 //Validar y Agregar Situación
@@ -881,6 +891,18 @@ fillAtributes();
 		});	//End function always		
 	}
 
+	function fillAspects(){
+		$.post( "include/pdo/aspecto.php", {function:"getAspects"}, function(data){					
+		})
+		.done(function(data) {
+			aspectos = jQuery.parseJSON(data);													
+		})//End function done
+		.fail(function() {
+		})//End function fail
+		.always(function() {						
+		});	//End function always		
+	}
+
 });//End Document Ready
 </script>
 </head>
@@ -1207,22 +1229,12 @@ fillAtributes();
 	                	<form id="nuevasi">                 
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="atributosi">Atributo</label>
-	                       	<select id="atributosi" class="form-control validar">
-	                        	<?php
-									$atributos = mysql_query("SELECT id, descripcion FROM call_evaluacion_atributo WHERE estatus = '1'");
-										if (mysql_num_rows($atributos)){
-											echo '<option>Seleccionar...</option>';
-											while ($row = mysql_fetch_array($atributos)){
-												echo '<option value="'.$row['id'].'">'.utf8_encode($row['descripcion']).'</option>';
-											}//End while
-										}//End if						
-								?>                        
+	                       	<select id="atributosi" class="form-control validar">	                        	                        
 	                        </select>
 	                    </div>
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="aspectosi">Aspecto a Evaluar</label>
-	                       	<select id="aspectosi" class="form-control validar">
-	                        	<option>Seleccionar...</option>                        	                  
+	                       	<select id="aspectosi" class="form-control validar">                   	                  
 	                        </select>
 	                    </div>                            
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
