@@ -37,33 +37,39 @@ $(document).ready(function(){
 var id;
 var atributos;
 var aspectos;
+var situations;
 
 fillAtributes();
 fillAspects();
+fillSituations();
 
 //Activar Menú
-	$("#menu2").attr('class','active');	
+	$("#menu2").attr('class','active');
 
 //Buscar los Aspectos despues de seleccionar un Atributo
 	$('#atributosi').change(function () {
-		$('#aspectosi').empty();		
-		$('#atributosi option:selected').each(function () {
-			elegido=$(this).val();
-			$.post('include/buscar_asp.php', { elegido: elegido }, function(data){
-				$('#aspectosi').html(data);
-			});            
-        });
+		$('#aspectosi').empty();
+		$('#aspectosi').append("<option>Seleccionar...</option>")	
+		elegido = $(this).val();
+    	//Buscamos los Aspectos
+    	$.each(aspectos, function(i,item){
+    		if (elegido == aspectos[i].id_atributo){
+    			$('#aspectosi').append('<option value="'+ aspectos[i].id + '">'+ aspectos[i].descripcion + '</option>');
+    		}				
+		});
    });
   
 //Buscar los Aspectos despues de seleccionar un Atributo
 	$('#atributosi2').change(function () {
-		$('#aspectosi2').empty();		
-		$('#atributosi2 option:selected').each(function () {
-			elegido=$(this).val();
-			$.post('include/buscar_asp.php', { elegido: elegido }, function(data){
-				$('#aspectosi2').html(data);
-			});            
-        });
+		$('#aspectosi2').empty();
+		$('#aspectosi2').append("<option>Seleccionar...</option>")	
+		elegido = $(this).val();
+    	//Buscamos los Aspectos
+    	$.each(aspectos, function(i,item){
+    		if (elegido == aspectos[i].id_atributo){
+    			$('#aspectosi2').append('<option value="'+ aspectos[i].id + '">'+ aspectos[i].descripcion + '</option>');
+    		}				
+		});
    });
    
 //Mostrar Formulario de Nuevo atributo
@@ -380,6 +386,7 @@ fillAspects();
 							case '1':
 								$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Exito!</strong> Aspecto a Evaluar Editado Correctamente</div>');						
 								$('#listaAspecto').DataTable().ajax.reload();
+								fillAspects();
 							break;
 							case '0':
 								$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');						
@@ -404,7 +411,7 @@ fillAspects();
 		$('#atributosi').empty();
 		$('#atributosi').append("<option>Seleccionar...</option>");
 		$.each(atributos, function(i,item){
-				$('#atributosi').append("<option>"+ atributos[i].descripcion +"</option>");    					
+			$('#atributosi').append('<option value="'+atributos[i].id + '">'+ atributos[i].descripcion + '</option>');				
 		});		
 	});
 
@@ -432,11 +439,10 @@ fillAspects();
 		if (contador < 1){			
 			bootbox.confirm('¿Seguro que Desea Guardar la Situación a Evaluar?', function(result){				
 				if (result == true){
-					accion = 'nuevo';
 					aspecto = $('#aspectosi').val();								
 					descripcion = $('#descripcionsi').val();
 					grupo = $('#gruposi').val();					
-					$.post( "include/guardar_situacion.php", {accion:accion, aspecto:aspecto, descripcion:descripcion, grupo:grupo}, function(data){							
+					$.post( "include/pdo/situacion.php", {function:"insertSituation", aspecto:aspecto, descripcion:descripcion, grupo:grupo}, function(data){							
 					})
 					.done(function(data) {								
 						switch (data){
@@ -445,7 +451,8 @@ fillAspects();
 							break;							
 							case '1':
 								$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Exito!</strong> Situación a Evaluar Guardada Correctamente</div>');
-								$('#listaSituacion').DataTable().ajax.reload();						
+								$('#listaSituacion').DataTable().ajax.reload();
+								fillSituations();				
 							break;
 							case '0':
 								$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');						
@@ -468,18 +475,35 @@ fillAspects();
 //Mostrar datos de Edición de Situación
 	$('#listaSituacion tbody').on('click', '.edit', function(){
 		var id = $(this).attr('id');
-		//Obtenemos la tabla
-		var table = $('#listaSituacion').DataTable();
-		//Obtenemos la fila	y los Datos	
-		var fila = table.row( $(this).parents('tr') ).index();
-		var situacion = table.cell(fila,1).data();	
-		var grupo = table.cell(fila,2).data();	
-		$('#numerosi').val(id);
-		$('#descripcionsi2').val(situacion);
-		$('#gruposi2').val(grupo);		
-		$('#atributosi2 option:first, #aspectosi2 option:first').prop("selected", "selected");
-		$('#atributosi2, #aspectosi2, #descripcionsi2').parent().removeClass('has-error has-success');	
-		$('#editarSituacion').modal('toggle');		
+		$.post( "include/pdo/situacion.php", {function:"getSituation", id:id}, function(data){							
+		}, "json")//End function
+		.done(function(data){
+			console.log(data);				
+			$('#numerosi').val(id);
+			$('#atributosi2').empty();
+			$('#atributosi2').append("<option>Seleccionar...</option>");
+			$.each(atributos, function(i,item){
+				$('#atributosi2').append('<option value="'+atributos[i].id + '">'+ atributos[i].descripcion + '</option>');				
+			});
+			$('#atributosi2').val(data.id_atributo).parent().removeClass('has-error has-success');
+			$('#aspectosi2').empty();
+			$('#aspectosi2').append("<option>Seleccionar...</option>");
+			//Buscamos los Aspectos
+	    	$.each(aspectos, function(i,item){
+	    		if (data.id_atributo == aspectos[i].id_atributo){
+	    			$('#aspectosi2').append('<option value="'+ aspectos[i].id + '">'+ aspectos[i].descripcion + '</option>');
+	    		}				
+			});			
+			$('#aspectosi2').val(data.id_aspecto).parent().removeClass('has-error has-success');			
+			$('#descripcionsi2').val(data.descripcion).parent().removeClass('has-error has-success');
+			$('#gruposi2').val(data.grupo);				
+			$('#editarSituacion').modal('toggle');																			
+		 })//End function done
+		.fail(function(){
+			$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');					
+		})//End function fail
+		.always(function(){						
+		});//End Always		
 	});//End Function
 
 //Validar y Editar Situacion
@@ -507,11 +531,10 @@ fillAspects();
 			bootbox.confirm('¿Seguro que Desea Editar la Situación a Evaluar?', function(result){				
 				if (result == true){
 					id = $('#numerosi').val();
-					accion = 'editar';					
 					aspecto = $('#aspectosi2').val();
 					descripcion = $('#descripcionsi2').val();
 					grupo = $('#gruposi2').val();
-					$.post( "include/guardar_situacion.php", {accion:accion, id:id, aspecto:aspecto, descripcion:descripcion, grupo:grupo}, function(data){
+					$.post( "include/pdo/situacion.php", {function:"editSituation", id:id, aspecto:aspecto, descripcion:descripcion, grupo:grupo}, function(data){
 					})
 					.done(function(data) {								
 						switch (data){
@@ -520,7 +543,8 @@ fillAspects();
 							break;							
 							case '1':
 								$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Exito!</strong> Situación a Evaluar Editada Correctamente</div>');
-								$('#listaSituacion').DataTable().ajax.reload();						
+								$('#listaSituacion').DataTable().ajax.reload();
+								fillSituations();					
 							break;
 							case '0':
 								$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');						
@@ -546,13 +570,14 @@ fillAspects();
 		var id = $(this).attr('id');
 		bootbox.confirm('¿Seguro que desea el cambiar el Estatus de la Situación a Evaluar?', function(result){
 			if (result == true){
-				$.post( "include/guardar_situacion.php", {accion:accion, id:id}, function(data){							
+				$.post( "include/pdo/situacion.php", {function:"statusSituation", id:id}, function(data){							
 					})
 					.done(function(data) {								
 						switch (data){													
 							case '1':
 								$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Exito!</strong> Situación a Evaluar Editada Correctamente</div>');						
 								$('#listaSituacion').DataTable().ajax.reload();
+								fillSituations();	
 							break;
 							case '0':
 								$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>¡Error!</strong> A Ocurrido un error, Intente más tarde</div>');						
@@ -573,28 +598,26 @@ fillAspects();
 		var formulario = 'nuevo';
 		$('#exampleform').dataTable().fnDestroy();
 		$('#exampleform').dataTable({
-		"ajax": {
-			"url": "include/consulta_ca.php",
-			"data": {                       
-				formulario:formulario             
-				},
-			"type": 'POST'
-		},
-		"sPaginationType": "full_numbers",
-		"language":{ 
-			"url": "../DataTables/locale/Spanish.json"
-		},
-		"aaSorting": [[ 0, "asc" ],[1, "asc"],[2, "asc"], [3, "asc"]],
-		aLengthMenu: [[10,50,100],[10,50,100]],
-			"iDisplayLength": 100,
-		"bPaginate": false,
-	});	
-	
+			"ajax": {
+	    		"url": "include/pdo/situacion.php",
+	    		"data": {
+	                function:"newForm"
+	                },
+				"type": 'POST'
+		  	},
+			"sPaginationType": "full_numbers",
+			"language":{ 
+				"url": "../DataTables/locale/Spanish.json"
+			},
+			"aaSorting": [[ 0, "asc" ],[1, "asc"],[2, "asc"], [3, "asc"]],
+			aLengthMenu: [[10,50,100],[10,50,100]],
+				"iDisplayLength": 100,
+			"bPaginate": false,
+		});	
 		$('#nuevoFormulario').removeClass('oculto');
 		$('#all').prop('checked', true);
-//		$('#boton4').addClass('oculto');		// Comentado para evitar que el icono de + se esconda luego de cerrar el modal de nuevo formulario!
-	});//End Function
 
+	});//End Function
 
 //Guardar Formulario
 	$('#saveform').click(function(){
@@ -640,9 +663,6 @@ fillAspects();
 				.always(function() {						
 				});
 				$('#nuevoFormulario').modal('toggle');
-
-//				$('#nuevoFormulario').addClass('oculto');
-//				$('#boton4').removeClass('oculto');
 			}//End if
 		});//End Function bootbox	
 	});//End Function
@@ -767,42 +787,42 @@ fillAspects();
 	  	},
 		"sPaginationType": "full_numbers",
 		"columnDefs": [
-				{         
-		              "render": function ( data, type, row ) {
-		              	switch (row[2]){
-		              		case "1":
-		              		status = '<img src="imagenes/activo.png">';
-		              		break;
-		              		case "0":
-		              		status = '<img src="imagenes/inactivo.png">';
-		              		break;
-		              		default:
-		              		status = '';
-		              		break;
-		              	}
-		                  return status;
-		              },
-		              "targets": 2
-		        },
-		      	{         
-		              "render": function ( data, type, row ) {
-		              		edit = '<img src="imagenes/edit.png" class="edit cursor" title="Editar Atributo" id="'+ row[0]+'">';
-		              		switch (row[2]){
-			              		case "1":
-			              			block = '<img src="imagenes/block2.png" class="camb cursor" title="Bloquear Atributo" id="'+ row[0] +'">';
-			              		break;
-			              		case "0":
-			              			block = '<img src="imagenes/block.png" class="camb cursor" title="Desbloquear Atributo" id="'+ row[0] +'">';
-			              		break;
-			              		default:
-			              			block = '';
-			              		break;
-			              	}		              		
-		                  return  edit + ' ' + block;
-		              },
-		              "targets": 3
-		        }           
-		      ],
+			{         
+              "render": function ( data, type, row ) {
+              	switch (row[2]){
+              		case "1":
+              		status = '<img src="imagenes/activo.png">';
+              		break;
+              		case "0":
+              		status = '<img src="imagenes/inactivo.png">';
+              		break;
+              		default:
+              		status = '';
+              		break;
+              	}
+                  return status;
+              },
+              "targets": 2
+	        },
+	      	{         
+              "render": function ( data, type, row ) {
+              		edit = '<img src="imagenes/edit.png" class="edit cursor" title="Editar Atributo" id="'+ row[0]+'">';
+              		switch (row[2]){
+	              		case "1":
+	              			block = '<img src="imagenes/block2.png" class="camb cursor" title="Bloquear Atributo" id="'+ row[0] +'">';
+	              		break;
+	              		case "0":
+	              			block = '<img src="imagenes/block.png" class="camb cursor" title="Desbloquear Atributo" id="'+ row[0] +'">';
+	              		break;
+	              		default:
+	              			block = '';
+	              		break;
+	              	}		              		
+                  return  edit + ' ' + block;
+              },
+              "targets": 3
+	        }           
+	      ],
 		"language":{ 
 			"url": "../DataTables/locale/Spanish.json"
 		},
@@ -820,42 +840,42 @@ fillAspects();
 	  	},
 		"sPaginationType": "full_numbers",
 		"columnDefs": [
-				{         
-		              "render": function ( data, type, row ) {
-		              	switch (row[3]){
-		              		case "1":
-		              		status = '<img src="imagenes/activo.png">';
-		              		break;
-		              		case "0":
-		              		status = '<img src="imagenes/inactivo.png">';
-		              		break;
-		              		default:
-		              		status = '';
-		              		break;
-		              	}
-		                  return status;
-		              },
-		              "targets": 3
-		        },
-		      	{         
-		              "render": function ( data, type, row ) {
-		              		edit = '<img src="imagenes/edit.png" class="edit cursor" title="Editar Aspecto" id="'+ row[0]+'">';
-		              		switch (row[3]){
-			              		case "1":
-			              			block = '<img src="imagenes/block2.png" class="camb cursor" title="Bloquear Aspecto" id="'+ row[0] +'">';
-			              		break;
-			              		case "0":
-			              			block = '<img src="imagenes/block.png" class="camb cursor" title="Desbloquear Aspecto" id="'+ row[0] +'">';
-			              		break;
-			              		default:
-			              			block = '';
-			              		break;
-			              	}		              		
-		                  return  edit + ' ' + block;
-		              },
-		              "targets": 4
-		        }           
-		      ],
+			{         
+              "render": function ( data, type, row ) {
+              	switch (row[3]){
+              		case "1":
+              		status = '<img src="imagenes/activo.png">';
+              		break;
+              		case "0":
+              		status = '<img src="imagenes/inactivo.png">';
+              		break;
+              		default:
+              		status = '';
+              		break;
+              	}
+                  return status;
+              },
+              "targets": 3
+	        },
+	      	{         
+              "render": function ( data, type, row ) {
+              		edit = '<img src="imagenes/edit.png" class="edit cursor" title="Editar Aspecto" id="'+ row[0]+'">';
+              		switch (row[3]){
+	              		case "1":
+	              			block = '<img src="imagenes/block2.png" class="camb cursor" title="Bloquear Aspecto" id="'+ row[0] +'">';
+	              		break;
+	              		case "0":
+	              			block = '<img src="imagenes/block.png" class="camb cursor" title="Desbloquear Aspecto" id="'+ row[0] +'">';
+	              		break;
+	              		default:
+	              			block = '';
+	              		break;
+	              	}		              		
+                  return  edit + ' ' + block;
+              },
+              "targets": 4
+	        }           
+	      ],
 		"language":{
 			"url": "../DataTables/locale/Spanish.json"
 		},
@@ -872,6 +892,59 @@ fillAspects();
 			"type": 'POST'
 	  	},
 		"sPaginationType": "full_numbers",
+		"columnDefs": [
+			{         
+              "render": function ( data, type, row ) {
+              	switch (row[5]){
+              		case "1":
+              		status = '<img src="imagenes/activo.png">';
+              		break;
+              		case "0":
+              		status = '<img src="imagenes/inactivo.png">';
+              		break;
+              		default:
+              		status = '';
+              		break;
+              	}
+                  return status;
+              },
+              "targets": 5
+	        },
+	      	{         
+              "render": function ( data, type, row ) {
+              		edit = '<img src="imagenes/edit.png" class="edit cursor" title="Editar Aspecto" id="'+ row[0]+'">';
+              		switch (row[5]){
+	              		case "1":
+	              			block = '<img src="imagenes/block2.png" class="camb cursor" title="Bloquear Aspecto" id="'+ row[0] +'">';
+	              		break;
+	              		case "0":
+	              			block = '<img src="imagenes/block.png" class="camb cursor" title="Desbloquear Aspecto" id="'+ row[0] +'">';
+	              		break;
+	              		default:
+	              			block = '';
+	              		break;
+	              	}		              		
+                  return  edit + ' ' + block;
+              },
+              "targets": 6
+	        }           
+	      ],
+		"language":{
+			"url": "../DataTables/locale/Spanish.json"
+		},
+		aLengthMenu: [[10,50,100],[10,50,100]],
+			"iDisplayLength": 10
+	});
+
+	$('#listaFormulario').dataTable({
+		"ajax": {
+    		"url": "include/pdo/formulario.php",
+    		"data": {
+                function:"getAllForms"
+                },
+			"type": 'POST'
+	  	},
+		"sPaginationType": "full_numbers",		
 		"language":{
 			"url": "../DataTables/locale/Spanish.json"
 		},
@@ -903,6 +976,18 @@ fillAspects();
 		});	//End function always		
 	}
 
+	function fillSituations(){
+		$.post( "include/pdo/situacion.php", {function:"getSituations"}, function(data){					
+		})
+		.done(function(data) {
+			situations = jQuery.parseJSON(data);													
+		})//End function done
+		.fail(function() {
+		})//End function fail
+		.always(function() {						
+		});	//End function always		
+	}	
+
 });//End Document Ready
 </script>
 </head>
@@ -919,7 +1004,7 @@ fillAspects();
 	      	<li id="opcion1"><a data-toggle="tab" href="#atributos">Atributos</a></li>
 	      	<li id="opcion2"><a data-toggle="tab" href="#aspectos">Aspectos</a></li>
 	        <li id="opcion3"><a data-toggle="tab" href="#situaciones">Situaciones</a></li>
-	        <li id="opcion4"><a data-toggle="tab" href="#formularios">Formularios</a></li>	        
+	        <li id="opcion4"><a data-toggle="tab" href="#formularios">Formularios</a></li>
 		</ul>
 	    
 	    <div class="tab-content">
@@ -1000,12 +1085,12 @@ fillAspects();
 	                    <thead>
 	                        <tr>
 	                            <th>N°</th>
-	                            <th>Situación</th>                                                       
-	                            <th>Grupo</th>	                            
+	                            <th>Situación</th>
+	                            <th>Grupo</th>
 	                            <th>Aspecto</th>
 	                            <th>Atributo</th>
 	                            <th>Estatus</th>
-	                            <th>Comandos</th>             
+	                            <th>Comandos</th>
 	                        </tr>
 	                    </thead>
 	                    <tfoot>        
@@ -1169,7 +1254,8 @@ fillAspects();
 	                	<form id="nuevoe">                 
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="atributoe">Atributo</label>
-	                       	<select id="atributoe" class="form-control validar">	                       		               
+	                       	<select id="atributoe" class="form-control validar">
+	                       		<option>Seleccionar...</option>                       		               
 	                        </select>
 	                    </div>                   
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
@@ -1201,7 +1287,8 @@ fillAspects();
 	                    </div>
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="atributoe2">Atributo</label>
-	                       	<select id="atributoe2" class="form-control validar"> 		                        	                       
+	                       	<select id="atributoe2" class="form-control validar">
+	                       		<option>Seleccionar...</option>	                        	                       
 	                        </select>
 	                    </div>                    
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
@@ -1229,12 +1316,14 @@ fillAspects();
 	                	<form id="nuevasi">                 
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="atributosi">Atributo</label>
-	                       	<select id="atributosi" class="form-control validar">	                        	                        
+	                       	<select id="atributosi" class="form-control validar">
+	                       		<option>Seleccionar...</option>              	                        
 	                        </select>
 	                    </div>
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="aspectosi">Aspecto a Evaluar</label>
-	                       	<select id="aspectosi" class="form-control validar">                   	                  
+	                       	<select id="aspectosi" class="form-control validar">
+	                       		<option>Seleccionar...</option>                  	                  
 	                        </select>
 	                    </div>                            
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
@@ -1270,16 +1359,7 @@ fillAspects();
 	                    </div>
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">
 	                        <label for="atributosi2">Atributo</label>
-	                       	<select id="atributosi2" class="form-control validar">
-	                        	<?php
-									$atributos = mysql_query("SELECT id, descripcion FROM call_evaluacion_atributo WHERE estatus = '1'");
-										if (mysql_num_rows($atributos)){
-											echo '<option>Seleccionar...</option>';
-											while ($row = mysql_fetch_array($atributos)){
-												echo '<option value="'.$row['id'].'">'.utf8_encode($row['descripcion']).'</option>';
-											}//End while
-										}//End if						
-								?>                        
+	                       	<select id="atributosi2" class="form-control validar">	                        	                      
 	                        </select>
 	                    </div>
 	                    <div class="form-group col-xs-12 col-md-8 col-md-offset-2">

@@ -53,7 +53,8 @@ $(document).ready(function(){
 	        	var max = moment($('#cierre').val());        	
 	        }        
 	        var apertura = moment(data[1], 'YYYY-MM-DD');
-	       	if ( (isNaN( min ) && isNaN( max )) || (apertura >= min && isNaN( max )) || (apertura <= max && isNaN(min)) || (apertura >= min && apertura <= max)     
+	        var cierre = moment(data[2], 'YYYY-MM-DD');
+	       	if ((isNaN( min ) && isNaN( max )) || (apertura >= min && isNaN(max)) || (cierre <= max && isNaN(min)) || (apertura >= min && cierre <= max)     
 	            )
 	        {
 	           return true; 
