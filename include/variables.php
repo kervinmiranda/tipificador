@@ -25,7 +25,6 @@ $principal = '<li id="menu1"><a href="principal.php">Principal</a></li>';
 $administracion = '<li id="menu2" class="dropdown">
 			   		<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Administración<span class="caret"></span></a>
 						<ul class="dropdown-menu" role="menu">
-							<li><a href="calidad.php">Calidad</a></li>
 							<li><a href="pais.php">Paises</a></li>							
 							<li><a href="tipificacion.php">Tipificaciones</a></li>
 							<li><a href="usuario.php">Usuarios</a></li>						
@@ -47,7 +46,7 @@ $incidencia = '<li id="menu4" class="dropdown">
 							<li><a href="historial.php">Historial</a></li>
 						</ul>
 				</li> <!-- .dropdown -->';
-//Módulo 5
+//Módulo 4
 $evaluacion = '<li id="menu5" class="dropdown">
 			   		<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Evaluación<span class="caret"></span></a>
 						<ul class="dropdown-menu" role="menu">
@@ -56,7 +55,7 @@ $evaluacion = '<li id="menu5" class="dropdown">
 							<li><a href="#">Estadísticas</a></li>
 						</ul>
 				</li> <!-- .dropdown -->';
-//Módulo 6
+//Módulo 5
 $indicadores = '<li id="menu6"><a href = "indicadores.php" >Indicadores Gráficos</a></li>';
 if(isset($_SESSION['user'])){
 	//Datos de la Sesión del usuario
@@ -85,8 +84,8 @@ $sesion = '<ul class="nav navbar-nav navbar-right">
 			break;
 			case 3: $permitidos = $permitidos.$incidencia;
 			break;
-			case 4: $permitidos = $permitidos.$evaluacion;
-			break;
+			//case 4: $permitidos = $permitidos.$evaluacion;
+			//break;
 			case 5: $permitidos = $permitidos.$indicadores;
 			break;
 		}

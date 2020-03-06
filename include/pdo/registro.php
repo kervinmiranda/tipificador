@@ -104,6 +104,7 @@ if(isset($_SESSION['user'])){
 		$guia = strtoupper(str_replace(' ', '',$_POST['guia']));
 		$guia = preg_replace('/\s+/', '', $guia);		
 		$comentario = trim($_POST['comentario']);
+		$date = date('Y-m-d H:i:s');
 		switch($_SESSION['departamento']){
 			case 'REDES SOCIALES':
 				$socialuser = strtolower(str_replace(' ', '',$_POST['socialuser']));
@@ -116,7 +117,7 @@ if(isset($_SESSION['user'])){
 		}
 		$sql = $objdatabase->prepare("INSERT INTO call_registro (pais, fecha, usuario, departamento, motivo, sub_motivo, libced, usersocial, guiatracking, comentario, estatus) VALUES (:pais, :fecha, :userid, :departamento, :motivo, :submotivo, :codigo, :socialuser, :guia, :comentario, 1)");
 		$sql->bindParam(':pais', $pais, PDO::PARAM_STR);
-		$sql->bindParam(':fecha', date('Y-m-d H:i:s'), PDO::PARAM_STR);
+		$sql->bindParam(':fecha', $date, PDO::PARAM_STR);
 		$sql->bindParam(':userid', $_SESSION['nick'], PDO::PARAM_STR);
 		$sql->bindParam(':departamento', $_SESSION['departamento'], PDO::PARAM_STR);
 		$sql->bindParam(':motivo', $motivo, PDO::PARAM_STR);
@@ -249,9 +250,10 @@ if(isset($_SESSION['user'])){
 	//Insert Gestion
 	function insertCommnent($id, $comment){
 		$objdatabase = new Database();
+		$date = date('Y-m-d H:i:s');
 		$sql = $objdatabase->prepare("INSERT INTO call_gestion (id, fecha, gestor, comentario) VALUES (:id, :fecha, :userid, :comentario)");
 		$sql->bindParam(':id', $id, PDO::PARAM_STR);
-		$sql->bindParam(':fecha', date('Y-m-d H:i:s'), PDO::PARAM_STR);
+		$sql->bindParam(':fecha', $date, PDO::PARAM_STR);
 		$sql->bindParam(':userid', $_SESSION['nick'], PDO::PARAM_STR);
 		$sql->bindParam(':comentario', trim($comment), PDO::PARAM_STR);
 		$sql->execute(); // se confirma que el query exista		
@@ -337,6 +339,7 @@ if(isset($_SESSION['user'])){
 			break;
 		case "newRegisterIncidence":
 			newRegisterIncidence();
+			break;
 		case "lista":
 			lista();
 			break;

@@ -6,7 +6,7 @@ setlocale(LC_TIME, 'es_VE'); # Localiza en español es_Venezuela
 date_default_timezone_set('America/Caracas');
 include_once 'database.php';
 @session_start();
-if(isset($_SESSION['user'])){
+if(isset($_SESSION['user'])){	
 	// Get  Incidents
 	function getIncidents(){
 		$objdatabase = new Database();
@@ -196,13 +196,15 @@ if(isset($_SESSION['user'])){
 	function insertComment($id){
 		$objdatabase = new Database();
 		$estatus = searchIncident($id);
+		$comentario = trim($_POST['comentario']);
+		$date = date('Y-m-d H:i:s');
 		if ($estatus != '0'){
 			$objdatabase = new Database();
 			$sql = $objdatabase->prepare("INSERT INTO call_gestion (id, fecha, gestor, comentario, estatus) VALUES (:id, :fecha, :userid, :comentario, :estatus)");
 			$sql->bindParam(':id', $id, PDO::PARAM_STR);
-			$sql->bindParam(':fecha', date('Y-m-d H:i:s'), PDO::PARAM_STR);
+			$sql->bindParam(':fecha', $date, PDO::PARAM_STR);
 			$sql->bindParam(':userid', $_SESSION['nick'], PDO::PARAM_STR);
-			$sql->bindParam(':comentario', trim($_POST['comentario']), PDO::PARAM_STR);
+			$sql->bindParam(':comentario', $comentario, PDO::PARAM_STR);
 			$sql->bindParam(':estatus', $estatus, PDO::PARAM_STR);
 			$sql->execute(); // se confirma que el query exista		
 			$count = $sql->rowCount();//Verificamos el resultado

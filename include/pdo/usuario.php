@@ -7,8 +7,7 @@ date_default_timezone_set('America/Caracas');
 include_once 'database.php';
 @session_start();
 if(isset($_SESSION['user'])){
-	$fecha = date('Y/m/d'); //Obtener la fecha del día	
-	
+
 	// New User
 	function newUser(){
 		$ci = $_POST['cedula'];
