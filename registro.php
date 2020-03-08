@@ -128,7 +128,7 @@ var obj = jQuery.parseJSON('<?php echo json_encode($submotivos)?>');
 						if (id == 0){
 							$('#mensajes').prepend('<div class="alert alert-danger text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Error al incluir los datos, Intente más tarde</div>');
 						}else{
-							$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Exito!</strong> Tipificación Ingresada Correctamente con el N°: <strong>'+id+'</strong></div>');
+							$('#mensajes').prepend('<div class="alert alert-success text-center"><a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a><strong>Exito!</strong> Tipificación Ingresada Correctamente con el N°: <strong>'+ id +'</strong></div>');
 							$('#formulario input').val('').parent().removeClass('has-error has-success');
 							$('#formulario textarea').val('').parent().removeClass('has-error has-success');
 							$('#formulario select').prop('selectedIndex',0).parent().removeClass('has-error has-success');
