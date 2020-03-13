@@ -10,21 +10,27 @@ if(isset($_SESSION['user'])){
 
 	// New User
 	function newUser(){
-		$ci = $_POST['cedula'];
+		$ci = $_POST['cedula'];		
 		$userid = $_POST['userid'];
 		$exists = searchUser($ci, $userid);
 		if ($exists ==  false){
-			$objdatabase = new Database();	
+			$objdatabase = new Database();
+			$nombre = mb_convert_case($_POST['nombre'], MB_CASE_TITLE, "UTF-8");
+			$cargo = mb_convert_case($_POST['cargo'], MB_CASE_TITLE, "UTF-8");
+			$depratamento = mb_convert_case($_POST['departamento'], MB_CASE_TITLE, "UTF-8");
+			$clave = md5($_POST['clave']);
+			$nivel = $_POST['tipousuario'];
+			$modulos = implode(",", $_POST['modulos']);
 		 	$sql = $objdatabase->prepare("INSERT INTO call_usuario(ci, nombre, cargo, userid, departamento, clave, nivel, modulos, estatus) VALUES (:ci, :nombre, :cargo, :userid, :departamento, :clave, :nivel, :modulos, 1)");
 			//Definimos los parametros de la Query
 			$sql->bindParam(':ci', $ci, PDO::PARAM_STR);
-			$sql->bindParam(':nombre', ucwords(strtolower($_POST['nombre'])), PDO::PARAM_STR);
-			$sql->bindParam(':cargo', ucwords(strtolower($_POST['cargo'])), PDO::PARAM_STR);
+			$sql->bindParam(':nombre', $nombre, PDO::PARAM_STR);
+			$sql->bindParam(':cargo', $cargo, PDO::PARAM_STR);
 			$sql->bindParam(':userid', $userid, PDO::PARAM_STR);
-			$sql->bindParam(':departamento',ucwords(strtolower($_POST['departamento'])), PDO::PARAM_STR);
-			$sql->bindParam(':clave', md5($_POST['clave']), PDO::PARAM_STR);
-			$sql->bindParam(':nivel', $_POST['tipousuario'], PDO::PARAM_STR);
-			$sql->bindParam(':modulos', implode(",", $_POST['modulos']), PDO::PARAM_STR);
+			$sql->bindParam(':departamento', $departamento, PDO::PARAM_STR);
+			$sql->bindParam(':clave', $clave, PDO::PARAM_STR);
+			$sql->bindParam(':nivel', $nivel, PDO::PARAM_STR);
+			$sql->bindParam(':modulos', $modulos, PDO::PARAM_STR);
 			if ($sql->execute()) { 
 			   	$data = "1";
 			}else{
@@ -43,15 +49,18 @@ if(isset($_SESSION['user'])){
 		$objdatabase = new Database();
 		$sql = $objdatabase->prepare("UPDATE call_usuario SET nombre =:nombre, cargo =:cargo, departamento =:departamento, nivel =:nivel, modulos =:modulos WHERE ci =:ci");
 		//Definimos los parametros de la Query
-		$sql->bindParam(':ci', $_POST['cedula'], PDO::PARAM_STR);
+		$ci = $_POST['cedula'];
 		$nombre = mb_convert_case($_POST['nombre'], MB_CASE_TITLE, "UTF-8");
 		$cargo = mb_convert_case($_POST['cargo'], MB_CASE_TITLE, "UTF-8");
 		$depratamento = mb_convert_case($_POST['departamento'], MB_CASE_TITLE, "UTF-8");
+		$nivel = $_POST['tipousuario'];
+		$modulos = implode(",", $_POST['modulos']);
+		$sql->bindParam(':ci', $ci , PDO::PARAM_STR);
 		$sql->bindParam(':nombre', $nombre, PDO::PARAM_STR);
 		$sql->bindParam(':cargo', $cargo, PDO::PARAM_STR);
 		$sql->bindParam(':departamento', $depratamento, PDO::PARAM_STR);
-		$sql->bindParam(':nivel', $_POST['tipousuario'], PDO::PARAM_STR);
-		$sql->bindParam(':modulos', implode(",", $_POST['modulos']), PDO::PARAM_STR);
+		$sql->bindParam(':nivel', $nivel, PDO::PARAM_STR);
+		$sql->bindParam(':modulos', $modulos, PDO::PARAM_STR);
 		if ($sql->execute()) {
 		   $data = "1";
 		} else {
@@ -109,9 +118,11 @@ if(isset($_SESSION['user'])){
 	// Reset Password
 	function resetPassword(){
 		$objdatabase = new Database();
+		$ci =  $_POST['cedula'];
+		$clave = $_POST['clave_nueva'];
 		$sql = $objdatabase->prepare("UPDATE call_usuario SET clave =:clave_nueva WHERE ci =:ci");
-		$sql->bindParam(':ci', $_POST['cedula'], PDO::PARAM_STR);
-		$sql->bindParam(':ci', $_POST['clave_nueva'], PDO::PARAM_STR);
+		$sql->bindParam(':ci', $ci, PDO::PARAM_STR);
+		$sql->bindParam(':ci', $clave, PDO::PARAM_STR);
 		$sql->execute(); // se confirma que el query exista	
 		//Verificamos el resultado
 		$count = $sql->rowCount();
@@ -132,8 +143,9 @@ if(isset($_SESSION['user'])){
 		}else if($_POST['estatus'] == 1){
 			$estatus_nuevo = 0;
 		}
+		$ci =  $_POST['cedula'];
 		$sql = $objdatabase->prepare("UPDATE call_usuario SET estatus =:estatus_nuevo WHERE ci =:ci");
-		$sql->bindParam(':ci', $_POST['cedula'], PDO::PARAM_STR);
+		$sql->bindParam(':ci', $ci, PDO::PARAM_STR);
 		$sql->bindParam(':estatus_nuevo', $estatus_nuevo, PDO::PARAM_STR);
 		$sql->execute(); // se confirma que el query exista	
 		//Verificamos el resultado
